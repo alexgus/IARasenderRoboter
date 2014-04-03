@@ -130,7 +130,11 @@ movableRobot(T,R):- target(T,_,_,I), R is I-1.
 /**
  * assertRobot(N,T,L)
  * assert all the robot in the database without
- * the movable one(s)
+ * the movable one(s).
+ * N : Nb of robots to enter
+ * T : id of the target
+ * L : List of robot's coordinates in reverse order
+ *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
  */
 assertRobot(N,_,_) :- N < 0,!.
 assertRobot(_,T,_) :- movableRobot(T,R), R = -1,!.
