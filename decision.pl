@@ -1,18 +1,16 @@
-/*
-
-
-  Définition de l'IA du joueur artificiel de Rasende Roboter
-
-
-*/
+/**
+ * Définition de l'IA du joueur artificiel de Rasende Roboter
+ * @author Kevin Maingené & Alexandre Guyon
+ */
 
 :- module( decision, [
 	init/1,
 	move/2
 ] ).
 
-/* target( numero de la cible, x ,y)
-*/
+/** 
+ * Target( numero de la cible, x ,y)
+ */
 target(0,7,5).
 target(1,6,1).
 target(2,9,10).
@@ -31,9 +29,10 @@ target(14,2,14).
 target(15,2,5).
 target(16,10,7).
 
-/*
-	Wall
-*/
+/**
+ * Wall(X1,Y1,X2,Y2)
+ * Means there a wall between thoses two cases
+ */
 wall(0,3,0,4).
 wall(0,6,0,7).
 wall(1,2,1,3).
@@ -89,26 +88,36 @@ not(_).
 
 init(_).
 
-
+/**
+ * deplacement(+X1,+Y1,+N,-X2,-Y2)
+ * X1,Y1 : old robot's place
+ * X2,Y2 : new robot's place
+ * Possible N values :
+ *   1 -> move right
+ *   2 -> move top
+ *   3 -> move left
+ *   4 -> move Down
+ */
+ 
 deplacement(X1,Y1,1,X1,Y1):- X1 = 15,!.
 deplacement(X1,Y1,1,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
 deplacement(X1,Y1,1,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
 
-deplacement(X1,Y1,2,X1,Y1):- Y3 = 0,!.
+deplacement(X1,Y1,2,X1,Y1):- Y1 = 0,!.
 deplacement(X1,Y1,2,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
 deplacement(X1,Y1,2,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
 
-deplacement(X1,Y1,3,X1,Y1):- X3 = 0,!.
+deplacement(X1,Y1,3,X1,Y1):- X1 = 0,!.
 deplacement(X1,Y1,3,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
 deplacement(X1,Y1,3,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
 
-deplacement(X1,Y1,4,X1,Y1):- Y3 = 15,!.
+deplacement(X1,Y1,4,X1,Y1):- Y1 = 15,!.
 deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
 deplacement(X1,Y1,4,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
 
-/*
-  move( +L, -ActionId )
-*/
+/**
+ * move( +L, -ActionId )
+ */
 
 %move( [0,0,0,0, T| R], L):- .
 
