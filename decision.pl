@@ -9,25 +9,26 @@
 ] ).
 
 /** 
- * Target( numero de la cible, x ,y)
+ * Target( numero de la cible, x ,y, couleur)
+ * Couleur 0 -> toute couleurs confonduent
  */
-target(0,7,5).
-target(1,6,1).
-target(2,9,10).
-target(3,13,5).
-target(4,6,13).
-target(5,11,2).
-target(6,5,4).
-target(7,1,10).
-target(8,14,13).
-target(9,4,9).
-target(10,9,1).
-target(11,9,14).
-target(12,1,3).
-target(13,12,9).
-target(14,2,14).
-target(15,2,5).
-target(16,10,7).
+target(0,7,5,0).
+target(1,6,1,1).
+target(2,9,10,1).
+target(3,13,5,1).
+target(4,6,13,1).
+target(5,11,2,2).
+target(6,5,4,2).
+target(7,1,10,2).
+target(8,14,13,2).
+target(9,4,9,3).
+target(10,9,1,3).
+target(11,9,14,3).
+target(12,1,3,3).
+target(13,12,9,4).
+target(14,2,14,4).
+target(15,2,5,4).
+target(16,10,7,4).
 
 /**
  * Wall(X1,Y1,X2,Y2)
@@ -114,6 +115,17 @@ deplacement(X1,Y1,3,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
 deplacement(X1,Y1,4,X1,Y1):- Y1 = 15,!.
 deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
 deplacement(X1,Y1,4,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
+
+
+/**
+ * movableRobot(+IdTarget,-idRobot)
+ *  0 : Blue robot
+ *  1 : Green robot
+ *  2 : Yellow robot
+ *  3 : Red robot
+ * -1 : Any
+ */
+movableRobot(T,R):- target(T,_,_,I), R is I-1.
 
 /**
  * move( +L, -ActionId )
