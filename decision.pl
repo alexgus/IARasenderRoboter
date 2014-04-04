@@ -141,13 +141,25 @@ movableRobot(T,R):- target(T,_,_,I), R is I-1.
  *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
  */
  
-assertRobot(N,_,_) :- N < 0,write('1'),!.
-assertRobot(_,T,_) :- write('2'),movableRobot(T,R), R = -1,write('2'),!.
-assertRobot(N,T,[X,Y|Q]) :- write('3'),movableRobot(T,R), R \= N, write('3'),
-									assert(robot(X,Y)), N1 is N-1,write('3'),assertRobot(N1,T,Q).
-assertRobot(N,T,[_,_|Q]) :- write('4'),movableRobot(T,R), R = N, write('4'),
+assertRobot(N,_,_) :- N < 0,!.
+assertRobot(_,T,_) :- movableRobot(T,R), R = -1,!.
+assertRobot(N,T,[X,Y|Q]) :- movableRobot(T,R), R \= N, 
+									assert(robot(X,Y)), N1 is N-1,assertRobot(N1,T,Q).
+assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N, 
 									N1 is N-1, assertRobot(N1,T,Q).
-%:- dynamic robot/2
+
+/**
+* recherche( +T, +X, +Y, -L )
+* T is the target
+* X and Y are the position of the robot
+* L is the move to go to the target
+*
+* ne marche pas, faut trouver autre chose
+**/
+
+chercher(T,X,Y,L):- target(T,X,Y,_).
+chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).
+									
 /**
  * move( +L, -ActionId )
  * L is the game configuration
