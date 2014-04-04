@@ -84,8 +84,8 @@ wall(14,13,15,13).
 wall(15,3,15,4).
 wall(15,9,15,10).
 
-not(A):- A,!,fail.
-not(_).
+%not(A):- A,!,fail.
+%not(_).
 
 init(_).
 
@@ -101,19 +101,23 @@ init(_).
  */
  
 deplacement(X1,Y1,1,X1,Y1):- X1 = 15,!.
+deplacement(X1,Y1,1,X1,Y1):- X3 is X1+1, X3 < 16, robot(X3,Y1),!.
 deplacement(X1,Y1,1,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
 deplacement(X1,Y1,1,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
 
 deplacement(X1,Y1,2,X1,Y1):- Y1 = 0,!.
+deplacement(X1,Y1,2,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(X1,Y3),!.
 deplacement(X1,Y1,2,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
 deplacement(X1,Y1,2,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
 
 deplacement(X1,Y1,3,X1,Y1):- X1 = 0,!.
+deplacement(X1,Y1,3,X1,Y1):- X3 is X1-1, X3 >= 0, robot(X3,Y1),!.
 deplacement(X1,Y1,3,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
 deplacement(X1,Y1,3,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
 
 deplacement(X1,Y1,4,X1,Y1):- Y1 = 15,!.
-deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,asserY1,X1,Y3),!.
+deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(X1,Y3),!.
+deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
 deplacement(X1,Y1,4,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
 
 
@@ -136,19 +140,22 @@ movableRobot(T,R):- target(T,_,_,I), R is I-1.
  * L : List of robot's coordinates in reverse order
  *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
  */
-assertRobot(N,_,_) :- N < 0,!.
-assertRobot(_,T,_) :- movableRobot(T,R), R = -1,!.
-assertRobot(N,T,[X,Y|Q]) :- movableRobot(T,R), R \= N,!, 
-									assert(robot(X,Y)), N1 is N-1,assertRobot(N1,T,Q).
-assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N,!, 
+ 
+assertRobot(N,_,_) :- N < 0,write('1'),!.
+assertRobot(_,T,_) :- write('2'),movableRobot(T,R), R = -1,write('2'),!.
+assertRobot(N,T,[X,Y|Q]) :- write('3'),movableRobot(T,R), R \= N, write('3'),
+									assert(robot(X,Y)), N1 is N-1,write('3'),assertRobot(N1,T,Q).
+assertRobot(N,T,[_,_|Q]) :- write('4'),movableRobot(T,R), R = N, write('4'),
 									N1 is N-1, assertRobot(N1,T,Q).
-
+%:- dynamic robot/2
 /**
  * move( +L, -ActionId )
  * L is the game configuration
+ * _ is the list of action
+ *exemple :assertRobot(3,1,[5,15,0,2,1,4,4,0]).
  */
-move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], L):- 
-	assertRobot(3,T,[XR,YR, XY,YY, XG,YG, XB,YB]).
+move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], _):- 
+	assertRobot(3,T,[XR,YR, XY,YY, XG,YG, XB,YB]), listing(robot).
 
 % Examples
 move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
