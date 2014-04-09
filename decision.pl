@@ -208,21 +208,54 @@ possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
  * X,Y : the position at the begin of the line
  */
 checkLine(X0,Y0,top) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
-checkLine(X0,Y0,top) :- X0 > 0, X1 is X0 - 1,
+checkLine(X0,Y0,top) :- X0 >= 0, X1 is X0 - 1,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									checkLine(X1,Y0,top).
 checkLine(X0,Y0,right) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
-checkLine(X0,Y0,right) :- X0 < 16, X1 is X0 + 1,
+checkLine(X0,Y0,right) :- X0 =< 16, X1 is X0 + 1,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									checkLine(X1,Y0,right).
 checkLine(X0,Y0,bottom) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
-checkLine(X0,Y0,bottom) :- Y0 < 16, X1 is X0 + 1,
+checkLine(X0,Y0,bottom) :- Y0 =< 16, X1 is X0 + 1,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									checkLine(X1,Y0,bottom).
-checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1.
-checkLine(X0,Y0,left) :- X0 > 0, X1 is X0 - 1,
+checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
+checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									checkLine(X1,Y0,left).
+
+/**
+ * Check is there's obstacle on the line
+ * until be blocked by other obstacle on
+ * these line.
+ * way(X,Y,D,L)
+ * X,Y : the position at the begin of the line
+ * L : List of tuple of possible way
+ */
+way(_,-1,top,[]).
+way(X0,Y0,top,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!,
+									YN is Y0 - 1, way(X0,YN,top,Q).
+way(X0,Y0,top,L) :- X0 >= 0, X1 is X0 - 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									way(X1,Y0,top,L).
+way(17,_,right,[]).
+way(X0,Y0,right,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!,
+									XN is X0 + 1, way(XN,Y0,right,Q).
+way(X0,Y0,right,L) :- X0 =< 16, X1 is X0 + 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									way(X1,Y0,right,L).
+way(_,17,bottom,[]).
+way(X0,Y0,bottom,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!,
+									YN is Y0 + 1, way(X0,YN,bottom,Q).
+way(X0,Y0,bottom,L) :- Y0 =< 16, X1 is X0 + 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									way(X1,Y0,bottom,L).
+way(-1,_,left,[]).
+way(X0,Y0,left,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!,
+									XN is X0 - 1, way(XN,Y0,left,Q).
+way(X0,Y0,left,L) :- X0 >= 0, X1 is X0 - 1,!,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									way(X1,Y0,left,L).
 
 
 /**
