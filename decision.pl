@@ -175,24 +175,56 @@ where(T,X,Y,line,bottom) :- target(T,TX,TY,_),TX = X,TY > Y.
 
 /**
  * Test if there a wall around this case
- * wallAround(X,Y)
+ * wallAround(+X1,+Y1,?X2,?Y2)
  * X,Y : the position of the case
  */
-wallAround(X,Y) :- X2 is X + 1, (wall(X,Y,X2,Y);wall(X2,Y,X,Y)),!.
-wallAround(X,Y) :- X2 is X - 1, (wall(X,Y,X2,Y);wall(X2,Y,X,Y)),!.
-wallAround(X,Y) :- Y2 is Y + 1, (wall(X,Y,X,Y2);wall(X,Y,X,Y2)),!.
-wallAround(X,Y) :- Y2 is Y - 1, (wall(X,Y,X,Y2);wall(X,Y2,X,Y)),!.
+wallAround(X1,Y1,X2,Y2) :- X2 is X1 + 1, 
+					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
+wallAround(X1,Y1,X2,Y2) :- X2 is X1 - 1, 
+					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
+wallAround(X1,Y1,X2,Y2) :- Y2 is Y1 + 1, 
+					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
+wallAround(X1,Y1,X2,Y2) :- Y2 is Y1 - 1, 
+					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
 /* TODO Beurk ! Fix wall for checking reverse too */
+/* TODO Add limits of the map */
+/* TODO Add wallAround(X,Y,D) with D app {top,right,bottom,left} */
 
 /**
  * Test if the target is reachable
  * possibleTarget(T)
  * T : the target to test
  */
-possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y),!.
-possibleTarget(T) :- target(T,X,Y,_), deplacement(X,Y,top,X1,Y1),
-													wallAround(X1,Y1).
-/* TODO Add robots and add multiple ways */
+possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
+/* TODO Add robots */
+
+/**
+ * Check is there's obstacle on the line
+ * until be blocked by other obstacle on
+ * these line.
+ * checkLine(X,Y,D)
+ * X,Y : the position at the begin of the line
+ */
+checkLine(X0,Y0,top) :- wallAround(X0,Y0,X0,Y1),X0 \= X1,!.
+checkLine(X0,Y0,top) :- X0 >= 0, X1 is X0 - 1,checkLine(X1,Y0,left).
+checkLine(X0,Y0,right) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
+checkLine(X0,Y0,right) :- X0 =< 16, X1 is X0 + 1,checkLine(X1,Y0,left).
+checkLine(X0,Y0,bottom) :- wallAround(X0,Y0,X0,Y1),X0 \= X1,!.
+checkLine(X0,Y0,bottom) :- X0 =< 16, X1 is X0 + 1,checkLine(X1,Y0,left).
+checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
+checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,checkLine(X1,Y0,left).
+
+
+/**
+ * Test if the target is reachable
+ * possibleTarget(T)
+ * T : the target to test
+ */
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y2),
+								X1 < X2,checkLine(X1,Y1,left).
+
+									
+								
 									
 /**
  * move( +L, -ActionId )
