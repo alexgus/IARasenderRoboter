@@ -8,6 +8,9 @@
 	move/2
 ] ).
 
+/***************************************************************
+/********* Définition de la base de connaissance ***************
+/**************************************************************/
 
 /** 
  * Target( numero de la cible, x ,y, couleur)
@@ -85,48 +88,13 @@ wall(14,13,15,13).
 wall(15,3,15,4).
 wall(15,9,15,10).
 
+
+/***************************************************************
+/**************************** Util *****************************
+/**************************************************************/
+
 %not(A):- A,!,fail.
 %not(_).
-
-init(_).
-
-/**
- * deplacement(+X1,+Y1,+N,-X2,-Y2)
- * X1,Y1 : old robot's place
- * X2,Y2 : new robot's place
- * N : the direction (top,right,bottom,left)
- */
- 
-deplacement(X1,Y1,right,X1,Y1):- X1 = 15,!.
-deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, robot(X3,Y1),!.
-deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
-deplacement(X1,Y1,right,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
-
-deplacement(X1,Y1,top,X1,Y1):- Y1 = 0,!.
-deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(X1,Y3),!.
-deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
-deplacement(X1,Y1,top,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
-
-deplacement(X1,Y1,left,X1,Y1):- X1 = 0,!.
-deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, robot(X3,Y1),!.
-deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
-deplacement(X1,Y1,left,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
-
-deplacement(X1,Y1,bottom,X1,Y1):- Y1 = 15,!.
-deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(X1,Y3),!.
-deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
-deplacement(X1,Y1,bottom,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
-
-
-/**
- * movableRobot(+IdTarget,-idRobot)
- *  0 : Blue robot
- *  1 : Green robot
- *  2 : Yellow robot
- *  3 : Red robot
- * -1 : Any
- */
-movableRobot(T,R):- target(T,_,_,I), R is I-1.
 
 /**
  * assertRobot(N,T,L)
@@ -136,8 +104,7 @@ movableRobot(T,R):- target(T,_,_,I), R is I-1.
  * T : id of the target
  * L : List of robot's coordinates in reverse order
  *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
- */
- 
+ */ 
 assertRobot(N,_,_) :- N < 0,!.
 assertRobot(_,T,_) :- movableRobot(T,R), R = -1,!.
 assertRobot(N,T,[X,Y|Q]) :- movableRobot(T,R), R \= N, 
@@ -146,16 +113,15 @@ assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N,
 									N1 is N-1, assertRobot(N1,T,Q).
 
 /**
-* recherche( +T, +X, +Y, -L )
-* T is the target
-* X and Y are the position of the robot
-* L is the move to go to the target
-*
-* ne marche pas, faut trouver autre chose
-**/
-/*
-chercher(T,X,Y,L):- target(T,X,Y,_).
-chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).*/
+ * Defines the robot allowed to move, depends on target
+ * movableRobot(+IdTarget,-idRobot)
+ *  0 : Blue robot
+ *  1 : Green robot
+ *  2 : Yellow robot
+ *  3 : Red robot
+ * -1 : Any
+ */
+movableRobot(T,R):- target(T,_,_,I), R is I-1.
 
 /**
  * where(+T,+X,+Y,-DX,-DY)
@@ -200,6 +166,49 @@ wallAround(X1,Y1,X2,Y2) :- Y2 is Y1 - 1,
 possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
 /* TODO Add robots */
 
+/***************************************************************
+/************************ Prédicat *****************************
+/**************************************************************/
+
+/**
+ * deplacement(+X1,+Y1,+N,-X2,-Y2)
+ * X1,Y1 : old robot's place
+ * X2,Y2 : new robot's place
+ * N : the direction (top,right,bottom,left)
+ */
+deplacement(X1,Y1,right,X1,Y1):- X1 = 15,!.
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, robot(X3,Y1),!.
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
+deplacement(X1,Y1,right,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
+
+deplacement(X1,Y1,top,X1,Y1):- Y1 = 0,!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(X1,Y3),!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
+deplacement(X1,Y1,top,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
+
+deplacement(X1,Y1,left,X1,Y1):- X1 = 0,!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, robot(X3,Y1),!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
+deplacement(X1,Y1,left,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
+
+deplacement(X1,Y1,bottom,X1,Y1):- Y1 = 15,!.
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(X1,Y3),!.
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
+deplacement(X1,Y1,bottom,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
+
+
+/**
+* recherche( +T, +X, +Y, -L )
+* T is the target
+* X and Y are the position of the robot
+* L is the move to go to the target
+*
+* ne marche pas, faut trouver autre chose
+**/
+/*
+chercher(T,X,Y,L):- target(T,X,Y,_).
+chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).*/
+
 /**
  * Check is there's obstacle on the line
  * until be blocked by other obstacle on
@@ -223,6 +232,20 @@ checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
 checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									checkLine(X1,Y0,left).
+
+/**
+ * Test if the target is reachable
+ * possibleTarget(T)
+ * T : the target to test
+ */
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
+								X1 < X2,!,checkLine(X1,Y1,left),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
+								X1 > X2,!,checkLine(X1,Y1,right),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
+								Y1 < Y2,!,checkLine(X1,Y1,top),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
+								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
 
 /**
  * Check is there's obstacle on the line
@@ -258,20 +281,14 @@ way(X0,Y0,left,L) :- X0 >= 0, X1 is X0 - 1,!,
 									way(X1,Y0,left,L).
 
 
+/***************************************************************
+/********************* Appel externe ***************************
+/**************************************************************/
+
 /**
- * Test if the target is reachable
- * possibleTarget(T)
- * T : the target to test
+ * Initialize the begin of the game
  */
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
-								X1 < X2,!,checkLine(X1,Y1,left),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
-								X1 > X2,!,checkLine(X1,Y1,right),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
-								Y1 < Y2,!,checkLine(X1,Y1,top),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
-								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
-								
+init(_).							
 									
 /**
  * move( +L, -ActionId )
