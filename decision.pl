@@ -153,9 +153,27 @@ assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N,
 *
 * ne marche pas, faut trouver autre chose
 **/
-
+/*
 chercher(T,X,Y,L):- target(T,X,Y,_).
-chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).
+chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).*/
+
+/*chercher(T,X,Y,LP,LM)*/
+
+/**
+ * where(+T,+X,+Y,-DX,-DY)
+ * T : the target
+ * X,Y : Position of the robot
+ * DX : direction (top,bottom,line)
+ * DY : direction (right,left,column)
+ */
+where(T,X,Y,left,top) :- target(T,TX,TY,_),TX < X,TY < Y.
+where(T,X,Y,left,bottom) :- target(T,TX,TY,_),TX < X,TY > Y.
+where(T,X,Y,left,column) :- target(T,TX,TY,_),TX < X,TY = Y.
+where(T,X,Y,right,top) :- target(T,TX,TY,_),TX > X,TY < Y.
+where(T,X,Y,right,bottom) :- target(T,TX,TY,_),TX > X,TY > Y.
+where(T,X,Y,right,column) :- target(T,TX,TY,_),TX > X,TY = Y.
+where(T,X,Y,line,top) :- target(T,TX,TY,_),TX = X,TY < Y.
+where(T,X,Y,line,bottom) :- target(T,TX,TY,_),TX = X,TY > Y.
 									
 /**
  * move( +L, -ActionId )
