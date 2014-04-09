@@ -8,6 +8,7 @@
 	move/2
 ] ).
 
+
 /** 
  * Target( numero de la cible, x ,y, couleur)
  * Couleur 0 -> toute couleurs confonduent
@@ -93,32 +94,28 @@ init(_).
  * deplacement(+X1,+Y1,+N,-X2,-Y2)
  * X1,Y1 : old robot's place
  * X2,Y2 : new robot's place
- * Possible N values :
- *   1 -> move right
- *   2 -> move top
- *   3 -> move left
- *   4 -> move Down
+ * N : the direction (top,right,bottom,left)
  */
  
-deplacement(X1,Y1,1,X1,Y1):- X1 = 15,!.
-deplacement(X1,Y1,1,X1,Y1):- X3 is X1+1, X3 < 16, robot(X3,Y1),!.
-deplacement(X1,Y1,1,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
-deplacement(X1,Y1,1,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
+deplacement(X1,Y1,right,X1,Y1):- X1 = 15,!.
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, robot(X3,Y1),!.
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 16, wall(X1,Y1,X3,Y1),!.
+deplacement(X1,Y1,right,X2,Y2):- X3 is X1+1, X3 < 16, deplacement(X3,Y1,1,X2,Y2).
 
-deplacement(X1,Y1,2,X1,Y1):- Y1 = 0,!.
-deplacement(X1,Y1,2,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(X1,Y3),!.
-deplacement(X1,Y1,2,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
-deplacement(X1,Y1,2,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
+deplacement(X1,Y1,top,X1,Y1):- Y1 = 0,!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(X1,Y3),!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
+deplacement(X1,Y1,top,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,2,X2,Y2).
 
-deplacement(X1,Y1,3,X1,Y1):- X1 = 0,!.
-deplacement(X1,Y1,3,X1,Y1):- X3 is X1-1, X3 >= 0, robot(X3,Y1),!.
-deplacement(X1,Y1,3,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
-deplacement(X1,Y1,3,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
+deplacement(X1,Y1,left,X1,Y1):- X1 = 0,!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, robot(X3,Y1),!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
+deplacement(X1,Y1,left,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,3,X2,Y2).
 
-deplacement(X1,Y1,4,X1,Y1):- Y1 = 15,!.
-deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(X1,Y3),!.
-deplacement(X1,Y1,4,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
-deplacement(X1,Y1,4,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
+deplacement(X1,Y1,bottom,X1,Y1):- Y1 = 15,!.
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(X1,Y3),!.
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
+deplacement(X1,Y1,bottom,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,4,X2,Y2).
 
 
 /**
