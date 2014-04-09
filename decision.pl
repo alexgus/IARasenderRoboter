@@ -157,8 +157,6 @@ assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N,
 chercher(T,X,Y,L):- target(T,X,Y,_).
 chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).*/
 
-/*chercher(T,X,Y,LP,LM)*/
-
 /**
  * where(+T,+X,+Y,-DX,-DY)
  * T : the target
@@ -174,6 +172,27 @@ where(T,X,Y,right,bottom) :- target(T,TX,TY,_),TX > X,TY > Y.
 where(T,X,Y,right,column) :- target(T,TX,TY,_),TX > X,TY = Y.
 where(T,X,Y,line,top) :- target(T,TX,TY,_),TX = X,TY < Y.
 where(T,X,Y,line,bottom) :- target(T,TX,TY,_),TX = X,TY > Y.
+
+/**
+ * Test if there a wall around this case
+ * wallAround(X,Y)
+ * X,Y : the position of the case
+ */
+wallAround(X,Y) :- X2 is X + 1, (wall(X,Y,X2,Y);wall(X2,Y,X,Y)),!.
+wallAround(X,Y) :- X2 is X - 1, (wall(X,Y,X2,Y);wall(X2,Y,X,Y)),!.
+wallAround(X,Y) :- Y2 is Y + 1, (wall(X,Y,X,Y2);wall(X,Y,X,Y2)),!.
+wallAround(X,Y) :- Y2 is Y - 1, (wall(X,Y,X,Y2);wall(X,Y2,X,Y)),!.
+/* TODO Beurk ! Fix wall for checking reverse too */
+
+/**
+ * Test if the target is reachable
+ * possibleTarget(T)
+ * T : the target to test
+ */
+possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y),!.
+possibleTarget(T) :- target(T,X,Y,_), deplacement(X,Y,top,X1,Y1),
+													wallAround(X1,Y1).
+/* TODO Add robots and add multiple ways */
 									
 /**
  * move( +L, -ActionId )
@@ -187,6 +206,14 @@ move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], _):-
 % Examples
 move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
 move( [0,0,0,0,  2, 6,1 | _], [0,1,0,4] ) :- !.
+
+
+
+
+
+
+
+
 move( [0,0,0,0, 14, _,_, _,_, _,_, 15,5], [3,3,3,2,3,3,3,4] ) :- !.
 
 move( _, [] ) :- !.
