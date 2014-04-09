@@ -176,7 +176,9 @@ where(T,X,Y,line,bottom) :- target(T,TX,TY,_),TX = X,TY > Y.
 /**
  * Test if there a wall around this case
  * wallAround(+X1,+Y1,?X2,?Y2)
- * X,Y : the position of the case
+ * X1,Y1 : the position of the case
+ * X2,Y2 : the position of the second case
+ * 			means that you can't go through this
  */
 wallAround(X1,Y1,X2,Y2) :- X2 is X1 + 1, 
 					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
@@ -205,14 +207,22 @@ possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
  * checkLine(X,Y,D)
  * X,Y : the position at the begin of the line
  */
-checkLine(X0,Y0,top) :- wallAround(X0,Y0,X0,Y1),X0 \= X1,!.
-checkLine(X0,Y0,top) :- X0 >= 0, X1 is X0 - 1,checkLine(X1,Y0,left).
+checkLine(X0,Y0,top) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
+checkLine(X0,Y0,top) :- X0 > 0, X1 is X0 - 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									checkLine(X1,Y0,top).
 checkLine(X0,Y0,right) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
-checkLine(X0,Y0,right) :- X0 =< 16, X1 is X0 + 1,checkLine(X1,Y0,left).
-checkLine(X0,Y0,bottom) :- wallAround(X0,Y0,X0,Y1),X0 \= X1,!.
-checkLine(X0,Y0,bottom) :- X0 =< 16, X1 is X0 + 1,checkLine(X1,Y0,left).
-checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
-checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,checkLine(X1,Y0,left).
+checkLine(X0,Y0,right) :- X0 < 16, X1 is X0 + 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									checkLine(X1,Y0,right).
+checkLine(X0,Y0,bottom) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
+checkLine(X0,Y0,bottom) :- Y0 < 16, X1 is X0 + 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									checkLine(X1,Y0,bottom).
+checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1.
+checkLine(X0,Y0,left) :- X0 > 0, X1 is X0 - 1,
+									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
+									checkLine(X1,Y0,left).
 
 
 /**
@@ -228,7 +238,6 @@ reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
 								Y1 < Y2,!,checkLine(X1,Y1,top),!.
 reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
 								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
-									
 								
 									
 /**
@@ -243,13 +252,6 @@ move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], _):-
 % Examples
 move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
 move( [0,0,0,0,  2, 6,1 | _], [0,1,0,4] ) :- !.
-
-
-
-
-
-
-
 
 move( [0,0,0,0, 14, _,_, _,_, _,_, 15,5], [3,3,3,2,3,3,3,4] ) :- !.
 
