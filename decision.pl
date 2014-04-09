@@ -220,9 +220,14 @@ checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,checkLine(X1,Y0,left).
  * possibleTarget(T)
  * T : the target to test
  */
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y2),
-								X1 < X2,checkLine(X1,Y1,left).
-
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
+								X1 < X2,!,checkLine(X1,Y1,left),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
+								X1 > X2,!,checkLine(X1,Y1,right),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
+								Y1 < Y2,!,checkLine(X1,Y1,top),!.
+reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
+								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
 									
 								
 									
