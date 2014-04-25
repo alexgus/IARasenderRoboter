@@ -334,22 +334,18 @@ heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
  * N : The number of wall
  * D : top,right,bottom,left
  */
-wallDir(X,Y,top,N) :- X1 is X-1,
-								(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 1.
-wallDir(X,Y,top,N) :- X1 is X-1,
-								not(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 0.
-wallDir(X,Y,right,N) :- Y1 is Y+1, 
+wallDir(X,Y,top,N) :- Y1 is Y-1,
+								(wall(X,Y1,X,Y);wall(X,Y,X,Y1)),!, N is 1.
+wallDir(_,_,top,N) :- N is 0.
+wallDir(X,Y,right,N) :- X1 is X+1, 
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(_,_,right,N) :- N is 0.
+wallDir(X,Y,bottom,N) :- Y1 is Y+1,
 								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
-wallDir(X,Y,right,N) :- Y1 is Y+1,
-								not(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 0.
-wallDir(X,Y,top,N) :- X1 is X+1,
-								(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 1.
-wallDir(X,Y,top,N) :- X1 is X+1,
-								not(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 0.
-wallDir(X,Y,left,N) :- Y1 is Y-1, 
-								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
-wallDir(X,Y,left,N) :- Y1 is Y-1,
-								not(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 0.
+wallDir(_,_,bottom,N) :- N is 0.
+wallDir(X,Y,left,N) :- X1 is X-1, 
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(_,_,left,N) :- N is 0.
 
 /**
  * Count the number of wall N on a position X,Y
