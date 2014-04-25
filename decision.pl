@@ -99,6 +99,23 @@ wall(14,13,15,13).
 wall(15,3,15,4).
 wall(15,9,15,10).
 
+/**
+ * A graph in inserted in the database like this :
+ *
+ * sommet(N,X,Y,T).
+ * With :
+ * 	N   : id of sommet
+ *		X,Y : the position
+ * 	T   : the target if it exists
+ *
+ * arc(N1,N2,N3,[0,1]).
+ * With :
+ * 	N1,N2 : id of the sommet
+ * 	N3 	: id of optional sommet
+ */
+sommet(-1,-1,-1,_).
+arc(-1,-1,-1).
+
 
 /***************************************************************
 ***************************** Util *****************************
@@ -312,22 +329,6 @@ heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
 ***************************************************************/
 
 /**
- * A graph in inserted in the database like this :
- *
- * sommet(N,X,Y,T).
- * With :
- * 	N   : id of sommet
- *		X,Y : the position
- * 	T   : the target if it exists
- *
- * arc(N1,N2,[0,1]).
- * With :
- * 	N1,N2 : id of the sommet
- * 	[0,1] : 0 non directional arc, 1 directional arc N1->N2
- */
-
-
-/**
  * Count the number of wall N on a position X,Y and a direction D
  * wallDir(+X,+Y,+D,?N)
  * X,Y : Coordinates of the case to test
@@ -356,6 +357,16 @@ wallDir(_,_,left,N) :- N is 0.
 countWall(X,Y,N) :- wallDir(X,Y,top,N1), wallDir(X,Y,right,N2), 
 							wallDir(X,Y,bottom,N3), wallDir(X,Y,left,N4),
 							N is (N1+N2+N3+N4).
+
+nextSomID(I,F) :- sommet(I1,_,_,_), I1 > I, !, nextSomID(I1,F).
+nextSomID(I,F) :- F is I.
+nextSommetID(N) :- nextSomID(0,M), N is M +1.
+
+insertSommet(X,Y) :- nextSommetID(NS), target(NT,X,Y,_), 
+						assert(sommet(NS,X,Y,NT)).
+
+insertArc(S1,S2) :- assert(arc(S1,S2,-1)).
+insertArc(S1,S2,S3) :- assert(arc(S1,S2,S3)).
 
 makeGraphe(_).
 
