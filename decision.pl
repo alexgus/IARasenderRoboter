@@ -8,6 +8,17 @@
 	move/2
 ] ).
 
+/**
+ * Init à la main
+ * robot(N,X,Y)
+ * N : numéro robot
+ * X,Y : positon robot
+ */
+robot(1,1,1).
+robot(2,4,15).
+robot(3,13,6).
+robot(4,13,13).
+
 /***************************************************************
 ********** Définition de la base de connaissance ***************
 ***************************************************************/
@@ -280,6 +291,77 @@ way(X0,Y0,left,L) :- X0 >= 0, X1 is X0 - 1,!,
 									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
 									way(X1,Y0,left,L).
 
+/**
+ * Get the best way, based on heuristique
+ * heuristique(+T,+L,-B)
+ * T : the target
+ * L : List of possible way
+ * B : Best way based on heuristique (couple X,Y)
+ */
+heuristique(_,_,_,[],_).
+heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_), 
+	(XT - XB) > (XT - XW), (YT - YB) > (YT - YW),!,
+	heuristique(T,Q,(XW,YW)).
+heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
+	(XT - XB) < (XT - XW), (YT - YB) < (YT - YW),!,
+	heuristique(T,Q,(XB,YB)).
+
+
+/***************************************************************
+********************** Make graphe  ****************************
+***************************************************************/
+
+/**
+ * A graph in inserted in the database like this :
+ *
+ * sommet(N,X,Y,T).
+ * With :
+ * 	N   : id of sommet
+ *		X,Y : the position
+ * 	T   : the target if it exists
+ *
+ * arc(N1,N2,[0,1]).
+ * With :
+ * 	N1,N2 : id of the sommet
+ * 	[0,1] : 0 non directional arc, 1 directional arc N1->N2
+ */
+
+
+/**
+ * Count the number of wall N on a position X,Y and a direction D
+ * wallDir(+X,+Y,+D,?N)
+ * X,Y : Coordinates of the case to test
+ * N : The number of wall
+ * D : top,right,bottom,left
+ */
+wallDir(X,Y,top,N) :- X1 is X-1,
+								(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 1.
+wallDir(X,Y,top,N) :- X1 is X-1,
+								not(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 0.
+wallDir(X,Y,right,N) :- Y1 is Y+1, 
+								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
+wallDir(X,Y,right,N) :- Y1 is Y+1,
+								not(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 0.
+wallDir(X,Y,top,N) :- X1 is X+1,
+								(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 1.
+wallDir(X,Y,top,N) :- X1 is X+1,
+								not(wall(X,Y,X1,Y);wall(X1,Y,X,Y)),!, N is 0.
+wallDir(X,Y,left,N) :- Y1 is Y-1, 
+								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
+wallDir(X,Y,left,N) :- Y1 is Y-1,
+								not(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 0.
+
+/**
+ * Count the number of wall N on a position X,Y
+ * countWall(+X,+Y,?N).
+ * X,Y : Coordinates of the case to test
+ * N : The number of wall
+ */
+countWall(X,Y,N) :- wallDir(X,Y,top,N1), wallDir(X,Y,right,N2), 
+							wallDir(X,Y,bottom,N3), wallDir(X,Y,left,N4),
+							N is (N1+N2+N3+N4).
+
+makeGraphe(_).
 
 /***************************************************************
 ********************** Appel externe ***************************
@@ -288,7 +370,7 @@ way(X0,Y0,left,L) :- X0 >= 0, X1 is X0 - 1,!,
 /**
  * Initialize the begin of the game
  */
-init(_).							
+init(_) :- makeGraphe(_).						
 									
 /**
  * move( +L, -ActionId )
