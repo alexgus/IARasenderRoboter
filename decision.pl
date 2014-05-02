@@ -469,8 +469,8 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				insertSommet(X,Y),
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
-mkG(X,Y,[]).
-mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!
+mkG(_,_,[]).
+mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
 makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
