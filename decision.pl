@@ -461,10 +461,20 @@ getArc2(_,_,[]).
  */
 getArc(S,L) :- getArc2(S,[],L).
 
-mkG(X,Y) :- countWall(X,Y,N), N > 1,!,
-				insertSommet(X,Y).
+/**
+ * Make the graphe
+ * mkG(+X,+Y,+L)
+ * 	X,Y : current position to handle
+ * 	L 	 : List of next directions to handle
+ */
+mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
+				insertSommet(X,Y),
+				lDir(X,Y,LDIR),
+				mkG(X,Y,LDIR).
+mkG(X,Y,[]).
+mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q).
 
-makeGraphe :- target(0,X,Y,_), mkG(X,Y).
+makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
 
 /***************************************************************
 ********************** Appel externe ***************************
