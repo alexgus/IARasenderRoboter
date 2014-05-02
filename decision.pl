@@ -362,6 +362,62 @@ countWall(X,Y,N) :- wallDir(X,Y,top,N1), wallDir(X,Y,right,N2),
 							N is (N1+N2+N3+N4).
 
 /**
+ * Give the wall around
+ * lWallDir2(+X,+Y,+T,?S)
+ * 	X,Y : Position to check
+ * 	T	 : Tested direction
+ * 	S	 : List of wall direction (top,right,bottom,left)
+ */
+lWallDir2(X,Y,T,[top|Q]) :- wallDir(X,Y,top,N), N = 1, 
+								not(member(top, T)),!,
+								lWallDir2(X,Y,[top|T],Q).
+lWallDir2(X,Y,T,Q) :- not(member(top, T)),!,lWallDir2(X,Y,[top|T],Q).
+lWallDir2(X,Y,T,[right|Q]) :- wallDir(X,Y,right,N), N = 1, 
+								not(member(right, T)),!,
+								lWallDir2(X,Y,[right|T],Q).
+lWallDir2(X,Y,T,Q) :- not(member(right, T)),!,lWallDir2(X,Y,[right|T],Q).
+lWallDir2(X,Y,T,[bottom|Q]) :- wallDir(X,Y,bottom,N), N = 1, 
+								not(member(bottom, T)),!,
+								lWallDir2(X,Y,[bottom|T],Q).
+lWallDir2(X,Y,T,Q) :- not(member(bottom, T)),!,lWallDir2(X,Y,[bottom|T],Q).
+lWallDir2(X,Y,T,[left|Q]) :- wallDir(X,Y,left,N), N = 1, 
+								not(member(left, T)),!,
+								lWallDir2(X,Y,[left|T],Q).
+lWallDir2(X,Y,T,Q) :- not(member(left, T)),!,lWallDir2(X,Y,[left|T],Q).
+lWallDir2(_,_,_,[]).
+
+/**
+ * Give the wall around
+ * lWallDir(+X,+Y,?S)
+ * 	X,Y : Position to check
+ * 	S	 : List of wall direction (top,right,bottom,left)
+ */
+lWallDir(X,Y,S) :- lWallDir2(X,Y,[],S).
+
+/**
+ * Give the other direction not listed
+ * dirBar(?L1,?L2)
+ * 	L1,L2 : two lists of directions
+ */
+dirBar([],[]) :- !.
+dirBar([top|Q1],L2) :- !,dirBar(Q1,L2,right).
+dirBar(L1,[top|Q2]) :- dirBar(L1,Q2,right).
+dirBar([right|Q1],L2,right) :- !,dirBar(Q1,L2,bottom).
+dirBar(L1,[right|Q2],right) :- dirBar(L1,Q2,bottom).
+dirBar([bottom|Q1],L2,bottom) :- !,dirBar(Q1,L2,left).
+dirBar(L1,[bottom|Q2],bottom) :- dirBar(L1,Q2,left).
+dirBar([left|Q1],L2,left) :- !,dirBar(Q1,L2).
+dirBar(L1,[left|Q2],left) :- dirBar(L1,Q2).
+
+/**
+ * Give the next possible directions
+ * lDir(X,Y,L)
+ * 	X,Y : Position to check
+ * 	L	 : Possible directions to go
+ */
+lDir(X,Y,L) :- lWallDir(X,Y,T),dirBar(T,L).
+
+/**
  * nextSommetID(-N)
  * Give the next sommet's number unused
  */
@@ -405,10 +461,10 @@ getArc2(_,_,[]).
  */
 getArc(S,L) :- getArc2(S,[],L).
 
-mkG(_).
+mkG(X,Y) :- countWall(X,Y,N), N > 1,!,
+				insertSommet(X,Y).
 
-makeGraphe :- target(0,X,Y,_), countWall(X,Y,N), N > 1,!
-							.
+makeGraphe :- target(0,X,Y,_), mkG(X,Y).
 
 /***************************************************************
 ********************** Appel externe ***************************
