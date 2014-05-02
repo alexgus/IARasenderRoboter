@@ -18,15 +18,14 @@
  * 	T   : the target if it exists
  *
  *
- * arc(N1,N2,N3,[0,1]).
+ * arc(N1,N2).
  * With :
  *
  * 	N1,N2 : id of the sommet
- * 	N3 	: id of optional sommet
  */
 :- dynamic
 	sommet/4,
-	arc/3.
+	arc/2.
 
 /**
  * Init à la main
@@ -438,8 +437,7 @@ insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS),
  * Insert the an arc with S1,S2(,S3) coordinates
  * insertSommet(+S1,+S2[,+S3])
  */
-insertArc(S1,S2) :- assert(arc(S1,S2,-1)).
-insertArc(S1,S2,S3) :- assert(arc(S1,S2,S3)).
+insertArc(S1,S2) :- assert(arc(S1,S2)).
 
 /**
  * Get the arc of a sommet
@@ -448,9 +446,9 @@ insertArc(S1,S2,S3) :- assert(arc(S1,S2,S3)).
  * 	E : List of arc (entry)
  * 	L : List of arc
  */
-getArc2(S,E,[arc(S,S1,S2)|Q]) :- (arc(S,S1,S2);arc(S1,S,S2);arc(S2,S1,S)), 
-											not(member(arc(S,S1,S2),E)),!,
-											getArc2(S,[arc(S,S1,S2)|E],Q).
+getArc2(S,E,[arc(S,S1)|Q]) :- (arc(S,S1);arc(S1,S)), 
+											not(member(arc(S,S1),E)),!,
+											getArc2(S,[arc(S,S1)|E],Q).
 getArc2(_,_,[]).
 
 /**
@@ -472,7 +470,8 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
 mkG(X,Y,[]).
-mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q).
+mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!
+						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
 makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
 
