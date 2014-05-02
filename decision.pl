@@ -9,6 +9,26 @@
 ] ).
 
 /**
+ * A graph in inserted in the database like this :
+ *
+ * sommet(N,X,Y,T).
+ * With :
+ * 	N   : id of sommet
+ *		X,Y : the position
+ * 	T   : the target if it exists
+ *
+ *
+ * arc(N1,N2,N3,[0,1]).
+ * With :
+ *
+ * 	N1,N2 : id of the sommet
+ * 	N3 	: id of optional sommet
+ */
+:- dynamic
+	sommet/4,
+	arc/3.
+
+/**
  * Init à la main
  * robot(N,X,Y)
  * N : numéro robot
@@ -98,23 +118,6 @@ wall(14,13,14,14).
 wall(14,13,15,13).
 wall(15,3,15,4).
 wall(15,9,15,10).
-
-/**
- * A graph in inserted in the database like this :
- *
- * sommet(N,X,Y,T).
- * With :
- * 	N   : id of sommet
- *		X,Y : the position
- * 	T   : the target if it exists
- *
- * arc(N1,N2,N3,[0,1]).
- * With :
- * 	N1,N2 : id of the sommet
- * 	N3 	: id of optional sommet
- */
-sommet(-1,-1,-1,_).
-arc(-1,-1,-1).
 
 
 /***************************************************************
@@ -358,17 +361,54 @@ countWall(X,Y,N) :- wallDir(X,Y,top,N1), wallDir(X,Y,right,N2),
 							wallDir(X,Y,bottom,N3), wallDir(X,Y,left,N4),
 							N is (N1+N2+N3+N4).
 
+/**
+ * nextSommetID(-N)
+ * Give the next sommet's number unused
+ */
 nextSomID(I,F) :- sommet(I1,_,_,_), I1 > I, !, nextSomID(I1,F).
 nextSomID(I,F) :- F is I.
 nextSommetID(N) :- nextSomID(0,M), N is M +1.
 
-insertSommet(X,Y) :- nextSommetID(NS), target(NT,X,Y,_), 
-						assert(sommet(NS,X,Y,NT)).
+/**
+ * Insert the a sommet with X,Y coordinates
+ * insertSommet(+X,+Y)
+ */
+insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS), 
+						target(NT,X,Y,_), assert(sommet(NS,X,Y,NT)).
+insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS), 
+						assert(sommet(NS,X,Y,-1)).
 
+/**
+ * Insert the an arc with S1,S2(,S3) coordinates
+ * insertSommet(+S1,+S2[,+S3])
+ */
 insertArc(S1,S2) :- assert(arc(S1,S2,-1)).
 insertArc(S1,S2,S3) :- assert(arc(S1,S2,S3)).
 
-makeGraphe(_).
+/**
+ * Get the arc of a sommet
+ * getArc2(+S,+E,-L)
+ * 	S : The sommet to check
+ * 	E : List of arc (entry)
+ * 	L : List of arc
+ */
+getArc2(S,E,[arc(S,S1,S2)|Q]) :- (arc(S,S1,S2);arc(S1,S,S2);arc(S2,S1,S)), 
+											not(member(arc(S,S1,S2),E)),!,
+											getArc2(S,[arc(S,S1,S2)|E],Q).
+getArc2(_,_,[]).
+
+/**
+ * Get the arc of a sommet
+ * getArc(+S,-L)
+ * 	S : The sommet to check
+ * 	L : List of arc(S1,S2,S3)
+ */
+getArc(S,L) :- getArc2(S,[],L).
+
+mkG(_).
+
+makeGraphe :- target(0,X,Y,_), countWall(X,Y,N), N > 1,!
+							.
 
 /***************************************************************
 ********************** Appel externe ***************************
@@ -377,7 +417,7 @@ makeGraphe(_).
 /**
  * Initialize the begin of the game
  */
-init(_) :- makeGraphe(_).						
+init(_) :- makeGraphe.						
 									
 /**
  * move( +L, -ActionId )
