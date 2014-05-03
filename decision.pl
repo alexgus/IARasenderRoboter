@@ -470,8 +470,8 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
 mkG(_,_,[]).
-mkG(X,Y,[T|Q]) :- ((T \= top,Y =< 0) ; (T \= bottom,Y >= 15) ;
-							(T \= right, X =< 0) ; (T \= left, X >= 15)),
+mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 15) ;
+							(T \= right, X >= 0) ; (T \= left, X =< 15)),
 						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
