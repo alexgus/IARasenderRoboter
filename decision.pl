@@ -100,7 +100,7 @@ wall(8,8,8,9).
 wall(8,10,9,10).
 wall(8,14,9,14).
 wall(9,0,9,1).
-wall(9,1,10,2).
+wall(9,1,10,1).
 wall(9,7,10,7).
 wall(9,10,9,11).
 wall(9,13,9,14).
@@ -278,7 +278,7 @@ reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
 								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
 
 /**
- * Check is there's obstacle on the line
+ * Check is there's an obstacle on the line
  * until be blocked by other obstacle on
  * these line.
  * way(X,Y,D,L)
@@ -437,7 +437,7 @@ insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS),
  * Insert the an arc with S1,S2(,S3) coordinates
  * insertSommet(+S1,+S2[,+S3])
  */
-insertArc(S1,S2) :- assert(arc(S1,S2)).
+insertArc(S1,S2) :- S1 \= S2, assert(arc(S1,S2)).
 
 /**
  * Get the arc of a sommet
