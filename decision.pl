@@ -401,11 +401,11 @@ lWallDir(X,Y,S) :- lWallDir2(X,Y,[],S).
 dirBar([],[left,bottom,right,top]) :- !.
 dirBar([top|Q1],L2) :- !, dirBar(Q1,LT,right), delete(LT,top,L2).
 dirBar(L1,L2) :- dirBar(L1,L2,right).
-dirBar([top|Q1],L2,right) :- !, dirBar(Q1,LT,bottom), delete(LT,right,L2).
+dirBar([right|Q1],L2,right) :- !, dirBar(Q1,LT,bottom), delete(LT,right,L2).
 dirBar(L1,L2,right) :- dirBar(L1,L2,bottom).
-dirBar([top|Q1],L2,bottom) :- !, dirBar(Q1,LT,left), delete(LT,bottom,L2).
+dirBar([bottom|Q1],L2,bottom) :- !, dirBar(Q1,LT,left), delete(LT,bottom,L2).
 dirBar(L1,L2,bottom) :- dirBar(L1,L2,left).
-dirBar([top|Q1],L2,left) :- !, dirBar(Q1,LT), delete(LT,left,L2).
+dirBar([left|Q1],L2,left) :- !, dirBar(Q1,LT), delete(LT,left,L2).
 dirBar(L1,L2,left) :- dirBar(L1,L2).
 
 /**
@@ -470,10 +470,12 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
 mkG(_,_,[]).
-mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
+mkG(X,Y,[T|Q]) :- ((T \= top,Y =< 0) ; (T \= bottom,Y >= 15) ;
+							(T \= right, X =< 0) ; (T \= left, X >= 15)),
+						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
-makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
+makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
 
 /***************************************************************
 ********************** Appel externe ***************************
