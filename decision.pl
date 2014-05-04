@@ -32,7 +32,7 @@
  * 	N1,N2 : id of the sommet
  */
 :- dynamic
-	robot/3
+	robot/3,
 	sommet/4,
 	arc/2.
 
@@ -446,7 +446,7 @@ insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS),
  * Insert the an arc with S1,S2(,S3) coordinates
  * insertSommet(+S1,+S2[,+S3])
  */
-insertArc(S1,S2) :- S1 \= S2, assert(arc(S1,S2)).
+insertArc(S1,S2) :- S1 \= S2, not(arc(S1,S2)), assert(arc(S1,S2)).
 
 /**
  * Get the arc of a sommet
@@ -497,10 +497,10 @@ makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
  * 	S2 : Ending sommet
  * 	D  : Corresponding direction
  */
-tSom(S1,S2,top) :- sommet(S1,X1,Y1), sommet(S2,X1,Y2), Y2 < Y1.
-tSom(S1,S2,right) :- sommet(S1,X1,Y1), sommet(S2,X2,Y1), X1 < X2.
-tSom(S1,S2,bottom) :- sommet(S1,X1,Y1), sommet(S2,X1,Y2), Y2 > Y1.
-tSom(S1,S2,left) :- sommet(S1,X1,Y1), sommet(S2,X2,Y1), X1 > X2.
+tSom(S1,S2,top) :- sommet(S1,X1,Y1,_), sommet(S2,X1,Y2,_), Y2 < Y1.
+tSom(S1,S2,right) :- sommet(S1,X1,Y1,_), sommet(S2,X2,Y1,_), X1 < X2.
+tSom(S1,S2,bottom) :- sommet(S1,X1,Y1,_), sommet(S2,X1,Y2,_), Y2 > Y1.
+tSom(S1,S2,left) :- sommet(S1,X1,Y1,_), sommet(S2,X2,Y1,_), X1 > X2.
 
 
 /**
@@ -520,9 +520,18 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- !.
+shWay(_,_,_) :- !.
 
 /* TODO function with cost notion */
+sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2), 
+									not(member(S2,LI)).
+sWay(S1,S2,LI,[S2,S1],1) :- arc(S2,S1),
+									not(member(S2,LI)).
+sWay(S1,S2,LI,[LT1,LT2],C) :-
+								sWay(S1,ST,LI,LT1,C1), 
+								sWay(ST,S2,[S1|LI],LT2,C2), 
+								C is (C1 + C2).
+sWay(S,S,_,_,_) :- false.
 
 /***************************************************************
 ********************** Appel externe ***************************
