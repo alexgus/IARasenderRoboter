@@ -9,6 +9,14 @@
 ] ).
 
 /**
+ * A robot
+ * 
+ * robot(N,X,Y)
+ * with :
+ * 	N   : Id of the robot
+ *    X,Y : Position of the robot
+ * 
+ *
  * A graph in inserted in the database like this :
  *
  * sommet(N,X,Y,T).
@@ -24,6 +32,7 @@
  * 	N1,N2 : id of the sommet
  */
 :- dynamic
+	robot/3
 	sommet/4,
 	arc/2.
 
@@ -476,6 +485,44 @@ mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 15) ;
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
 makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
+
+/***************************************************************
+******************* Graphe  Manipulation  **********************
+***************************************************************/
+
+/**
+ * Translate way between two sommet in direction
+ * tSom(+S1,+S2,?D)
+ * 	S1 : Begining sommet
+ * 	S2 : Ending sommet
+ * 	D  : Corresponding direction
+ */
+tSom(S1,S2,top) :- sommet(S1,X1,Y1), sommet(S2,X1,Y2), Y2 < Y1.
+tSom(S1,S2,right) :- sommet(S1,X1,Y1), sommet(S2,X2,Y1), X1 < X2.
+tSom(S1,S2,bottom) :- sommet(S1,X1,Y1), sommet(S2,X1,Y2), Y2 > Y1.
+tSom(S1,S2,left) :- sommet(S1,X1,Y1), sommet(S2,X2,Y1), X1 > X2.
+
+
+/**
+ * Translate List of sommet by list of direction
+ * tListSom(+LS,+LD)
+ * 	LS : List of sommet
+ * 	LD : List of directions
+ */
+tListSom([],[]).
+tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
+
+
+/**
+ * Shortest way between two sommet
+ * shWay(+S1,+S2,?L)
+ * 	S1 : Begin point
+ * 	S2 : End point
+ * 	L 	: List of sommet begining by S1 and ending by S2
+ */
+shWay(S1,S2,L) :- !.
+
+/* TODO function with cost notion */
 
 /***************************************************************
 ********************** Appel externe ***************************
