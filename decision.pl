@@ -484,7 +484,7 @@ mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 15) ;
 						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
-makeGraphe :- target(0,X,Y,_), mkG(X,Y,[]).
+makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
 
 /***************************************************************
 ******************* Graphe  Manipulation  **********************
@@ -525,8 +525,8 @@ shWay(_,_,_) :- !.
 /* TODO function with cost notion */
 sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2), 
 									not(member(S2,LI)).
-sWay(S1,S2,LI,[S2,S1],1) :- arc(S2,S1),
-									not(member(S2,LI)).
+/*sWay(S1,S2,LI,[S2,S1],1) :- arc(S2,S1),
+									not(member(S2,LI)).*/
 sWay(S1,S2,LI,[LT1,LT2],C) :-
 								sWay(S1,ST,LI,LT1,C1), 
 								sWay(ST,S2,[S1|LI],LT2,C2), 
