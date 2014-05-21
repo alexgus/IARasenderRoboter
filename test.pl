@@ -48,10 +48,11 @@ robot(1,1,1).
 ********** Définition de la base de connaissance ***************
 ***************************************************************/
 
-/** 
+/**
  * Target( numero de la cible, x ,y, couleur)
  * Couleur 0 -> toute couleurs confonduent
  */
+ 
 target(0,2,2,0).
 
 
@@ -286,16 +287,16 @@ heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
  * D : top,right,bottom,left
  */
 wallDir(X,Y,top,N) :- Y1 is Y-1,
-								(wall(X,Y1,X,Y);wall(X,Y,X,Y1)),!, N is 1.
+								(wall(X,Y1,X,Y);wall(X,Y,X,Y1);Y1<1),!, N is 1.
 wallDir(_,_,top,N) :- N is 0.
-wallDir(X,Y,right,N) :- X1 is X+1, 
-								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(X,Y,right,N) :- X1 is X+1,
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y);X1>5),!, N is 1.
 wallDir(_,_,right,N) :- N is 0.
 wallDir(X,Y,bottom,N) :- Y1 is Y+1,
-								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
+								(wall(X,Y,X,Y1);wall(X,Y1,X,Y);Y1>5),!, N is 1.
 wallDir(_,_,bottom,N) :- N is 0.
-wallDir(X,Y,left,N) :- X1 is X-1, 
-								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(X,Y,left,N) :- X1 is X-1,
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y);X1<1),!, N is 1.
 wallDir(_,_,left,N) :- N is 0.
 
 /**
@@ -362,7 +363,7 @@ dirBar(L1,L2,left) :- dirBar(L1,L2).
  * 	X,Y : Position to check
  * 	L	 : Possible directions to go
  */
-lDir(X,Y,L) :- lWallDir(X,Y,T),dirBar(T,L).
+lDir(X,Y,L) :- lWallDir(X,Y,T), write('\n mur:'),write(T),dirBar(T,L).
 
 /**
  * nextSommetID(-N)
@@ -414,16 +415,17 @@ getArc(S,L) :- getArc2(S,[],L).
  * 	L 	 : List of next directions to handle
  */
 mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
-				insertSommet(X,Y),
-				lDir(X,Y,LDIR),
+				write('nouveau sommet \n'),
+				insertSommet(X,Y),				write('ajout sommet'), write(X), write(Y),
+				lDir(X,Y,LDIR),		write('dir'),write(LDIR),
 				mkG(X,Y,LDIR).
 mkG(_,_,[]).
 mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 5) ;
 							(T \= right, X >= 0) ; (T \= left, X =< 5)),
 						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
-						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
+						sommet(S1,X,Y,_),sommet(S2,XN,YN,_), write("insertArc"),insertArc(S1,S2).
 
-makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
+makeGraphe :- target(0,X,Y,_),write('cible 0 ok \n'), mkG(X,Y,[]).
 
 /***************************************************************
 ******************* Graphe  Manipulation  **********************
