@@ -42,7 +42,7 @@
  * N : numéro robot
  * X,Y : positon robot
  */
-robot(1,1,1).
+% robot(1,1,1).
 
 /***************************************************************
 ********** Définition de la base de connaissance ***************
@@ -156,24 +156,24 @@ possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
  * N : the direction (top,right,bottom,left)
  */
 deplacement(X1,Y1,right,X1,Y1):- X1 = 5,!.
-deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 5, robot(_,X3,Y1),!.
-deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 5, wall(X1,Y1,X3,Y1),!.
-deplacement(X1,Y1,right,X2,Y2):- X3 is X1+1, X3 < 5, deplacement(X3,Y1,right,X2,Y2).
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 6, robot(_,X3,Y1),!.
+deplacement(X1,Y1,right,X1,Y1):- X3 is X1+1, X3 < 6, wall(X1,Y1,X3,Y1),!.
+deplacement(X1,Y1,right,X2,Y2):- X3 is X1+1, X3 < 6, deplacement(X3,Y1,right,X2,Y2).
 
-deplacement(X1,Y1,top,X1,Y1):- Y1 = 0,!.
-deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, robot(_,X1,Y3),!.
-deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 >= 0, wall(X1,Y3,X1,Y1),!.
-deplacement(X1,Y1,top,X2,Y2):- Y3 is Y1-1, Y3 >= 0, deplacement(X1,Y3,top,X2,Y2).
+deplacement(X1,Y1,top,X1,Y1):- Y1 = 1,!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 > 0, robot(_,X1,Y3),!.
+deplacement(X1,Y1,top,X1,Y1):- Y3 is Y1-1, Y3 > 0, wall(X1,Y3,X1,Y1),!.
+deplacement(X1,Y1,top,X2,Y2):- Y3 is Y1-1, Y3 > 0, deplacement(X1,Y3,top,X2,Y2).
 
-deplacement(X1,Y1,left,X1,Y1):- X1 = 0,!.
-deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, robot(_,X3,Y1),!.
-deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 >= 0, wall(X3,Y1,X1,Y1),!.
-deplacement(X1,Y1,left,X2,Y2):- X3 is X1-1, X3 >= 0, deplacement(X3,Y1,left,X2,Y2).
+deplacement(X1,Y1,left,X1,Y1):- X1 = 1,!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 > 0, robot(_,X3,Y1),!.
+deplacement(X1,Y1,left,X1,Y1):- X3 is X1-1, X3 > 0, wall(X3,Y1,X1,Y1),!.
+deplacement(X1,Y1,left,X2,Y1):- X3 is X1-1, X3 > 0, deplacement(X3,Y1,left,X2,Y1).
 
 deplacement(X1,Y1,bottom,X1,Y1):- Y1 = 5,!.
-deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 5, robot(_,X1,Y3),!.
-deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 5, wall(X1,Y1,X1,Y3),!.
-deplacement(X1,Y1,bottom,X2,Y2):- Y3 is Y1+1, Y3 < 5, deplacement(X1,Y3,bottom,X2,Y2).
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 6, robot(_,X1,Y3),!.
+deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 6, wall(X1,Y1,X1,Y3),!.
+deplacement(X1,Y1,bottom,X1,Y2):- Y3 is Y1+1, Y3 < 6, deplacement(X1,Y3,bottom,X1,Y2).
 
 
 /**
@@ -415,14 +415,13 @@ getArc(S,L) :- getArc2(S,[],L).
  * 	L 	 : List of next directions to handle
  */
 mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
-				write('nouveau sommet \n'),
+				write('\n nouveau sommet \n'),
 				insertSommet(X,Y),				write('ajout sommet'), write(X), write(Y),
 				lDir(X,Y,LDIR),		write('dir'),write(LDIR),
-				mkG(X,Y,LDIR).
+				mkG(X,Y,LDIR),!.
 mkG(_,_,[]).
-mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 5) ;
-							(T \= right, X >= 0) ; (T \= left, X =< 5)),
-						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
+mkG(X,Y,[T|Q]) :- write('\n deplacement'),write(X),write(','),write(Y),write(T),deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),
+						write('\n dir encore possible'),write(Q),mkG(X,Y,Q),!,write('debut insert arc'),
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_), write("insertArc"),insertArc(S1,S2).
 
 makeGraphe :- target(0,X,Y,_),write('cible 0 ok \n'), mkG(X,Y,[]).
