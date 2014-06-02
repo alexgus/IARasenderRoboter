@@ -42,10 +42,10 @@
  * N : numéro robot
  * X,Y : positon robot
  */
-robot(1,1,1).
-robot(2,4,15).
-robot(3,13,6).
-robot(4,13,13).
+%robot(1,1,1).
+%robot(2,4,15).
+%robot(3,13,6).
+%robot(4,13,13).
 
 /***************************************************************
 ********** Définition de la base de connaissance ***************
@@ -347,16 +347,16 @@ heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
  * D : top,right,bottom,left
  */
 wallDir(X,Y,top,N) :- Y1 is Y-1,
-								(wall(X,Y1,X,Y);wall(X,Y,X,Y1)),!, N is 1.
+								(wall(X,Y1,X,Y);wall(X,Y,X,Y1);Y1<0),!, N is 1.
 wallDir(_,_,top,N) :- N is 0.
-wallDir(X,Y,right,N) :- X1 is X+1, 
-								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(X,Y,right,N) :- X1 is X+1,
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y);X1>15),!, N is 1.
 wallDir(_,_,right,N) :- N is 0.
 wallDir(X,Y,bottom,N) :- Y1 is Y+1,
-								(wall(X,Y,X,Y1);wall(X,Y1,X,Y)),!, N is 1.
+								(wall(X,Y,X,Y1);wall(X,Y1,X,Y);Y1>15),!, N is 1.
 wallDir(_,_,bottom,N) :- N is 0.
-wallDir(X,Y,left,N) :- X1 is X-1, 
-								(wall(X1,Y,X,Y);wall(X,Y,X1,Y)),!, N is 1.
+wallDir(X,Y,left,N) :- X1 is X-1,
+								(wall(X1,Y,X,Y);wall(X,Y,X1,Y);X1<0),!, N is 1.
 wallDir(_,_,left,N) :- N is 0.
 
 /**
@@ -477,11 +477,9 @@ getArc(S,L) :- getArc2(S,[],L).
 mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				insertSommet(X,Y),
 				lDir(X,Y,LDIR),
-				mkG(X,Y,LDIR).
+				mkG(X,Y,LDIR),!.
 mkG(_,_,[]).
-mkG(X,Y,[T|Q]) :- ((T \= top,Y >= 0) ; (T \= bottom,Y =< 15) ;
-							(T \= right, X >= 0) ; (T \= left, X =< 15)),
-						deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
+mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
 makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
