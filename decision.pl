@@ -42,7 +42,7 @@
  * N : numéro robot
  * X,Y : positon robot
  */
-%robot(1,1,1).
+robot(1,1,1).
 %robot(2,4,15).
 %robot(3,13,6).
 %robot(4,13,13).
@@ -477,7 +477,7 @@ getArc(S,L) :- getArc2(S,[],L).
 mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				insertSommet(X,Y),
 				lDir(X,Y,LDIR),
-				mkG(X,Y,LDIR),!.
+				mkG(X,Y,LDIR).
 mkG(_,_,[]).
 mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
@@ -518,7 +518,7 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(_,_,_) :- !.
+shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), trWay(T,D),flatten(D,L1), racc(L1,L).
 
 /* TODO function with cost notion */
 sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2), 
@@ -530,6 +530,39 @@ sWay(S1,S2,LI,[LT1,LT2],C) :-
 								sWay(ST,S2,[S1|LI],LT2,C2), 
 								C is (C1 + C2).
 sWay(S,S,_,_,_) :- false.
+
+/*
+* dirArc(+A,?D)
+* A : une liste de 2 sommet forment un arc
+* D : la direction de l'arc pour du sommet 1 atteindre le sommet 2
+*/
+dirArc([S1,S2],top):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 > Y2.
+dirArc([S1,S2],down):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 < Y2.
+dirArc([S1,S2],left):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 > X2.
+dirArc([S1,S2],right):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 < X2.
+
+/*
+* trWay(+L,?D)
+* L : liste imbriquer d'arc
+* D : liste de direction traduisant L
+*/
+trWay([],[]).
+trWay([[S1,S2]|Q],[T|D]):- dirArc([S1,S2],T),trWay(Q,D).
+trWay([L|Q],[T|D]):- trWay(L,T),trWay(Q,D).
+
+/*
+* racc(+L1,?L2)
+* L1 : liste des directions
+* L2 : liste simplifié des directions
+*/
+racc([],[]).
+racc([top,down|Q],[down|L]):- racc(Q,L).
+racc([down,top|Q],[top|L]):- racc(Q,L).
+racc([right,left|Q],[left|L]):- racc(Q,L).
+racc([left,right|Q],[right|L]):- racc(Q,L).
+racc([T|Q],[T|L]):- racc(Q,L).
+
+
 
 /***************************************************************
 ********************** Appel externe ***************************

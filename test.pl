@@ -418,7 +418,7 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				write('\n nouveau sommet \n'),
 				insertSommet(X,Y),				write('ajout sommet'), write(X), write(Y),
 				lDir(X,Y,LDIR),		write('dir'),write(LDIR),
-				mkG(X,Y,LDIR),!.
+				mkG(X,Y,LDIR).
 mkG(_,_,[]).
 mkG(X,Y,[T|Q]) :- write('\n deplacement'),write(X),write(','),write(Y),write(T),deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),
 						write('\n dir encore possible'),write(Q),mkG(X,Y,Q),!,write('debut insert arc'),
