@@ -84,6 +84,7 @@ wall(0,6,0,7).
 wall(1,2,1,3).
 wall(1,3,2,3).
 wall(1,9,1,10).
+wall(1,10,2,10).
 wall(2,5,2,6).
 wall(2,5,3,5).
 wall(2,14,2,15).
@@ -324,7 +325,7 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
 mkG(X,Y,[]) :- sommet(_,X,Y,_).				
-mkG(X,Y,[T|Q]) :- writeln('sommet '+X+' '+Y +' '+T+' '+Q),deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
+mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),writeln('arc '+S1+' '+S2),insertArc(S1,S2).
 
 						
@@ -374,7 +375,7 @@ sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 sWay(S1,S2,LI,[LT1,LT2],C) :-
 								sWay(S1,ST,LI,LT1,C1), 
 								sWay(ST,S2,[S1|LI],LT2,C2), 
-								C is (C1 + C2), C < 10.
+								C is (C1 + C2).
 sWay(S,S,_,_,_) :- false.
 
 /*
