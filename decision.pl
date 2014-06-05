@@ -31,6 +31,7 @@
  *
  * 	N1,N2 : id of the sommet
  */
+ 
 :- dynamic
 	robot/3,
 	sommet/4,
@@ -42,10 +43,11 @@
  * N : numéro robot
  * X,Y : positon robot
  */
+ 
 robot(1,1,1).
-%robot(2,4,15).
-%robot(3,13,6).
-%robot(4,13,13).
+robot(2,4,15).
+robot(3,13,6).
+robot(4,13,13).
 
 /***************************************************************
 ********** Définition de la base de connaissance ***************
@@ -136,74 +138,16 @@ wall(15,9,15,10).
 %not(_).
 
 /**
- * assertRobot(N,T,L)
+ * assertRobot(N,L)
  * assert all the robot in the database without
  * the movable one(s).
  * N : Nb of robots to enter
- * T : id of the target
  * L : List of robot's coordinates in reverse order
  *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
  */ 
-assertRobot(N,_,_) :- N < 0,!.
-assertRobot(_,T,_) :- movableRobot(T,R), R = -1,!.
-assertRobot(N,T,[X,Y|Q]) :- movableRobot(T,R), R \= N, 
-									assert(robot(X,Y)), N1 is N-1,assertRobot(N1,T,Q).
-assertRobot(N,T,[_,_|Q]) :- movableRobot(T,R), R = N, 
-									N1 is N-1, assertRobot(N1,T,Q).
+assertRobot(_,[]).
+assertRobot(N,[X,Y|Q]):- assert(robot(N,X,Y)),N1 is N-1, asserRobot(N1,Q).
 
-/**
- * Defines the robot allowed to move, depends on target
- * movableRobot(+IdTarget,-idRobot)
- *  0 : Blue robot
- *  1 : Green robot
- *  2 : Yellow robot
- *  3 : Red robot
- * -1 : Any
- */
-movableRobot(T,R):- target(T,_,_,I), R is I-1.
-
-/**
- * where(+T,+X,+Y,-DX,-DY)
- * T : the target
- * X,Y : Position of the robot
- * DX : direction (top,bottom,line)
- * DY : direction (right,left,column)
- */
-where(T,X,Y,left,top) :- target(T,TX,TY,_),TX < X,TY < Y.
-where(T,X,Y,left,bottom) :- target(T,TX,TY,_),TX < X,TY > Y.
-where(T,X,Y,left,column) :- target(T,TX,TY,_),TX < X,TY = Y.
-where(T,X,Y,right,top) :- target(T,TX,TY,_),TX > X,TY < Y.
-where(T,X,Y,right,bottom) :- target(T,TX,TY,_),TX > X,TY > Y.
-where(T,X,Y,right,column) :- target(T,TX,TY,_),TX > X,TY = Y.
-where(T,X,Y,line,top) :- target(T,TX,TY,_),TX = X,TY < Y.
-where(T,X,Y,line,bottom) :- target(T,TX,TY,_),TX = X,TY > Y.
-
-/**
- * Test if there a wall around this case
- * wallAround(+X1,+Y1,?X2,?Y2)
- * X1,Y1 : the position of the case
- * X2,Y2 : the position of the second case
- * 			means that you can't go through this
- */
-wallAround(X1,Y1,X2,Y2) :- X2 is X1 + 1, 
-					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
-wallAround(X1,Y1,X2,Y2) :- X2 is X1 - 1, 
-					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
-wallAround(X1,Y1,X2,Y2) :- Y2 is Y1 + 1, 
-					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
-wallAround(X1,Y1,X2,Y2) :- Y2 is Y1 - 1, 
-					(wall(X1,Y1,X2,Y2);wall(X2,Y2,X1,Y1)).
-/* TODO Beurk ! Fix wall for checking reverse too */
-/* TODO Add limits of the map */
-/* TODO Add wallAround(X,Y,D) with D app {top,right,bottom,left} */
-
-/**
- * Test if the target is reachable
- * possibleTarget(T)
- * T : the target to test
- */
-possibleTarget(T) :- target(T,X,Y,_), wallAround(X,Y,_,_).
-/* TODO Add robots */
 
 /***************************************************************
 ************************* Prédicat *****************************
@@ -234,106 +178,6 @@ deplacement(X1,Y1,bottom,X1,Y1):- Y1 = 15,!.
 deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, robot(_,X1,Y3),!.
 deplacement(X1,Y1,bottom,X1,Y1):- Y3 is Y1+1, Y3 < 16, wall(X1,Y1,X1,Y3),!.
 deplacement(X1,Y1,bottom,X2,Y2):- Y3 is Y1+1, Y3 < 16, deplacement(X1,Y3,bottom,X2,Y2).
-
-
-/**
-* recherche( +T, +X, +Y, -L )
-* T is the target
-* X and Y are the position of the robot
-* L is the move to go to the target
-*
-* ne marche pas, faut trouver autre chose
-**/
-/*
-chercher(T,X,Y,L):- target(T,X,Y,_).
-chercher(T,X,Y,[N1,D|Q]):- target(T,_,_,N), N1 is N -1, deplacement(X,Y,D,X2,Y2), chercher(T,X2,Y2,Q).*/
-
-/**
- * Check is there's obstacle on the line
- * until be blocked by other obstacle on
- * these line.
- * checkLine(X,Y,D)
- * X,Y : the position at the begin of the line
- */
-checkLine(X0,Y0,top) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
-checkLine(X0,Y0,top) :- X0 >= 0, X1 is X0 - 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									checkLine(X1,Y0,top).
-checkLine(X0,Y0,right) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
-checkLine(X0,Y0,right) :- X0 =< 16, X1 is X0 + 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									checkLine(X1,Y0,right).
-checkLine(X0,Y0,bottom) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!.
-checkLine(X0,Y0,bottom) :- Y0 =< 16, X1 is X0 + 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									checkLine(X1,Y0,bottom).
-checkLine(X0,Y0,left) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!.
-checkLine(X0,Y0,left) :- X0 >= 0, X1 is X0 - 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									checkLine(X1,Y0,left).
-
-/**
- * Test if the target is reachable
- * possibleTarget(T)
- * T : the target to test
- */
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
-								X1 < X2,!,checkLine(X1,Y1,left),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X2,Y1),
-								X1 > X2,!,checkLine(X1,Y1,right),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
-								Y1 < Y2,!,checkLine(X1,Y1,top),!.
-reachableTarget(T) :- target(T,X1,Y1,_),wallAround(X1,Y1,X1,Y2),
-								Y1 > Y2,!,checkLine(X1,Y1,bottom),!.
-
-/**
- * Check is there's an obstacle on the line
- * until be blocked by other obstacle on
- * these line.
- * way(X,Y,D,L)
- * X,Y : the position at the begin of the line
- * L : List of tuple of possible way
- */
-way(_,-1,top,[]).
-way(X0,Y0,top,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!,
-									YN is Y0 - 1, way(X0,YN,top,Q).
-way(X0,Y0,top,L) :- X0 >= 0, X1 is X0 - 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									way(X1,Y0,top,L).
-way(17,_,right,[]).
-way(X0,Y0,right,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!,
-									XN is X0 + 1, way(XN,Y0,right,Q).
-way(X0,Y0,right,L) :- X0 =< 16, X1 is X0 + 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									way(X1,Y0,right,L).
-way(_,17,bottom,[]).
-way(X0,Y0,bottom,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X1,Y0),X0 \= X1,!,
-									YN is Y0 + 1, way(X0,YN,bottom,Q).
-way(X0,Y0,bottom,L) :- Y0 =< 16, X1 is X0 + 1,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									way(X1,Y0,bottom,L).
-way(-1,_,left,[]).
-way(X0,Y0,left,[(X0,Y0)|Q]) :- wallAround(X0,Y0,X0,Y1),Y0 \= Y1,!,
-									XN is X0 - 1, way(XN,Y0,left,Q).
-way(X0,Y0,left,L) :- X0 >= 0, X1 is X0 - 1,!,
-									not((wall(X0,Y0,X1,Y0);wall(X1,Y0,X0,Y0))),
-									way(X1,Y0,left,L).
-
-/**
- * Get the best way, based on heuristique
- * heuristique(+T,+L,-B)
- * T : the target
- * L : List of possible way
- * B : Best way based on heuristique (couple X,Y)
- */
-heuristique(_,_,_,[],_).
-heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_), 
-	(XT - XB) > (XT - XW), (YT - YB) > (YT - YW),!,
-	heuristique(T,Q,(XW,YW)).
-heuristique(T,[(XW,YW)|Q],(XB,YB)) :- target(T,XT,YT,_),
-	(XT - XB) < (XT - XW), (YT - YB) < (YT - YW),!,
-	heuristique(T,Q,(XB,YB)).
-
 
 /***************************************************************
 ********************** Make graphe  ****************************
@@ -442,10 +286,10 @@ insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS),
 insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS), 
 						assert(sommet(NS,X,Y,-1)).
 
-/**
- * Insert the an arc with S1,S2(,S3) coordinates
- * insertSommet(+S1,+S2[,+S3])
- */
+/*
+* Insert the an arc with S1,S2(,S3) coordinates
+* insertSommet(+S1,+S2[,+S3])
+*/
 insertArc(S1,S2) :- S1 \= S2, not(arc(S1,S2)), assert(arc(S1,S2)).
 
 /**
@@ -478,17 +322,20 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				insertSommet(X,Y),
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
-mkG(_,_,[]).
+mkG(X,Y,[]) :- sommet(_,X,Y,_).				
 mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
+						
 makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
+makeGraphe(R) :- robot(R,X,Y), mkG(X,Y,[]).
+
 
 /***************************************************************
 ******************* Graphe  Manipulation  **********************
 ***************************************************************/
 
-/**
+/*
  * Translate way between two sommet in direction
  * tSom(+S1,+S2,?D)
  * 	S1 : Begining sommet
@@ -562,6 +409,9 @@ racc([right,left|Q],[left|L]):- racc(Q,L).
 racc([left,right|Q],[right|L]):- racc(Q,L).
 racc([T|Q],[T|L]):- racc(Q,L).
 
+cmpS :- cmpS(1).
+cmpS(C):- not(sommet(C,_,_,_)),!,C1 is C-1,assert(size(C1)).
+cmpS(C):- sommet(C,_,_,_), C1 is C +1, cmpS(C1).
 
 
 /***************************************************************
