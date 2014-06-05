@@ -44,10 +44,10 @@
  * X,Y : positon robot
  */
  
-robot(1,1,1).
-robot(2,4,15).
-robot(3,13,6).
-robot(4,13,13).
+%robot(1,1,1).
+%robot(2,4,15).
+%robot(3,13,6).
+%robot(4,13,13).
 
 /***************************************************************
 ********** Définition de la base de connaissance ***************
@@ -290,6 +290,7 @@ insertSommet(X,Y) :- not(sommet(_,X,Y,_)), nextSommetID(NS),
 * Insert the an arc with S1,S2(,S3) coordinates
 * insertSommet(+S1,+S2[,+S3])
 */
+insertArc(S,S).
 insertArc(S1,S2) :- S1 \= S2, not(arc(S1,S2)), assert(arc(S1,S2)).
 
 /**
@@ -323,8 +324,8 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				lDir(X,Y,LDIR),
 				mkG(X,Y,LDIR).
 mkG(X,Y,[]) :- sommet(_,X,Y,_).				
-mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
-						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
+mkG(X,Y,[T|Q]) :- writeln('sommet '+X+' '+Y +' '+T+' '+Q),deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
+						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),writeln('arc '+S1+' '+S2),insertArc(S1,S2).
 
 						
 makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
@@ -365,17 +366,15 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), trWay(T,D),flatten(D,L1), racc(L1,L).
+shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln(T),trWay(T,D),flatten(D,L1), racc(L1,L).
 
 /* TODO function with cost notion */
-sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2), 
+sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
-/*sWay(S1,S2,LI,[S2,S1],1) :- arc(S2,S1),
-									not(member(S2,LI)).*/
 sWay(S1,S2,LI,[LT1,LT2],C) :-
 								sWay(S1,ST,LI,LT1,C1), 
 								sWay(ST,S2,[S1|LI],LT2,C2), 
-								C is (C1 + C2).
+								C is (C1 + C2), C < 10.
 sWay(S,S,_,_,_) :- false.
 
 /*
@@ -394,7 +393,7 @@ dirArc([S1,S2],right):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 < X2
 * D : liste de direction traduisant L
 */
 trWay([],[]).
-trWay([[S1,S2]|Q],[T|D]):- dirArc([S1,S2],T),trWay(Q,D).
+trWay([S1,S2|Q],[T|D]):- dirArc([S1,S2],T),trWay(Q,D).
 trWay([L|Q],[T|D]):- trWay(L,T),trWay(Q,D).
 
 /*
