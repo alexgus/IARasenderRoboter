@@ -138,9 +138,9 @@ wall(15,9,15,10).
 not(A):- A,!,fail.
 not(_).
 
-member(X,[]):- fail.
-member(X,[X|Q]). 
-member(X,[T|Q]):- member(X,Q).
+member(_,[]):- fail.
+member(X,[X|_]). 
+member(X,[_|Q]):- member(X,Q).
 
 
 /**
@@ -376,13 +376,22 @@ shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln('cout'+C),trWay(T,D),flatten(D,L1)
 
 /* TODO function with cost notion */
 
-sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
+sWay2(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
-sWay(S1,S2,LI,[LT1,LT2],C) :-
+sWay2(S1,S2,LI,[LT1,LT2],C) :-
+								heuristique(S1,ST,S2),
 								sWay(S1,ST,LI,LT1,C1),
 								sWay(ST,S2,[S1|LI],LT2,C2), 
 								C is (C1 + C2).
-sWay(S,S,_,_,_) :- false.
+sWay2(S,S,_,_,_) :- false.
+
+
+heuristique(S1,S2,S3) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
+								sommet(S3,X3,Y3,_), (X2 = X3 ; Y2 = Y3).
+heuristique(S1,S2,S3) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
+								sommet(S3,X3,Y3,_), ((X1 - X3) > (X2 - X3) ; 
+															Y1 - Y3) > (Y2 - Y3)).
+heuristique(S1,S2,_) :- arc(S1,S2).
 
 /*
 * dirArc(+A,?D)
@@ -431,7 +440,7 @@ supS(_).
 
 resteGraphe:- supA,supS.
 
-moveRobot([],R,[]).
+moveRobot([],_,[]).
 moveRobot([T|Q],R,[R,T|Q1]):- moveRobot(Q,R,Q1). 
 /***************************************************************
 ********************** Appel externe ***************************
