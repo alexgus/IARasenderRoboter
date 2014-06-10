@@ -135,8 +135,13 @@ wall(15,9,15,10).
 ***************************** Util *****************************
 ***************************************************************/
 
-%not(A):- A,!,fail.
-%not(_).
+not(A):- A,!,fail.
+not(_).
+
+member(X,[]):- fail.
+member(X,[X|Q]). 
+member(X,[T|Q]):- member(X,Q).
+
 
 /**
  * assertRobot(N,L)
@@ -147,7 +152,7 @@ wall(15,9,15,10).
  *     (e.g : [X3,Y3,X2,Y2,X1,Y1,X0,Y0])
  */ 
 assertRobot(_,[]).
-assertRobot(N,[X,Y|Q]):- assert(robot(N,X,Y)),N1 is N-1, asserRobot(N1,Q).
+assertRobot(N,[X,Y|Q]):- assert(robot(N,X,Y)),N1 is N-1, assertRobot(N1,Q).
 
 
 /***************************************************************
@@ -326,7 +331,7 @@ mkG(X,Y,[]) :- not(sommet(_,X,Y,_)),!,
 				mkG(X,Y,LDIR).
 mkG(X,Y,[]) :- sommet(_,X,Y,_).				
 mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
-						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),writeln('arc '+S1+' '+S2),insertArc(S1,S2).
+						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
 						
 makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
@@ -367,13 +372,14 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln(C),trWay(T,D),flatten(D,L1), racc(L1,L).
+shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln('cout'+C),trWay(T,D),flatten(D,L1), racc(L1,L).
 
 /* TODO function with cost notion */
+
 sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
 sWay(S1,S2,LI,[LT1,LT2],C) :-
-								sWay(S1,ST,LI,LT1,C1), writeln(S1+' '+ST),
+								sWay(S1,ST,LI,LT1,C1),
 								sWay(ST,S2,[S1|LI],LT2,C2), 
 								C is (C1 + C2).
 sWay(S,S,_,_,_) :- false.
@@ -423,10 +429,10 @@ supS :- size(N), N1 is N+1, supS(N1).
 supS(N) :- retract(sommet(N,_,_,_)), N1 is N+1, supS(N1).
 supS(_).
 
-resteGraphe:- supA,supSs.
+resteGraphe:- supA,supS.
 
 moveRobot([],R,[]).
-moveRobot([T|Q],R,[R,T|Q]):- moveRobot(Q,R,Q). 
+moveRobot([T|Q],R,[R,T|Q1]):- moveRobot(Q,R,Q1). 
 /***************************************************************
 ********************** Appel externe ***************************
 ***************************************************************/
@@ -443,15 +449,15 @@ init(_) :- makeGraphe, cmpS.
  *exemple :assertRobot(3,1,[5,15,0,2,1,4,4,0]).
  */
 move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], L):- 
-	assertRobot(3,T,[XR,YR, XY,YY, XG,YG, XB,YB]), target(T,_,_,R), makeGraphe(R), robot(R,X1,Y1),sommet(SR,X1,Y1,_), 
-	sommet(ST,_,_,T), shWay(SR,ST,L1), moveRobot(L1,R,L), resteGraphe.
+	assertRobot(3,[XR,YR, XY,YY, XG,YG, XB,YB]), target(T,_,_,R1), R is R1-1, makeGraphe(R), robot(R,X1,Y1),sommet(SR,X1,Y1,_), 
+	sommet(ST,_,_,T), shWay(SR,ST,L1),!, writeln(L1), moveRobot(L1,R,L), writeln(L), resteGraphe.
 
 % Examples
-move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
-move( [0,0,0,0,  2, 6,1 | _], [0,1,0,4] ) :- !.
+%move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
+%move( [0,0,0,0,  2, 6,1 | _], [0,1,0,4] ) :- !.
 
-move( [0,0,0,0, 14, _,_, _,_, _,_, 15,5], [3,3,3,2,3,3,3,4] ) :- !.
-move( _, [] ) :- !.
+%move( [0,0,0,0, 14, _,_, _,_, _,_, 15,5], [3,3,3,2,3,3,3,4] ) :- !.
+%move( _, [] ) :- !.
 %        ^
 %        |
 %        Action: next configuration
