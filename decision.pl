@@ -135,8 +135,8 @@ wall(15,9,15,10).
 ***************************** Util *****************************
 ***************************************************************/
 
-not(A):- A,!,fail.
-not(_).
+%not(A):- A,!,fail.
+%not(_).
 
 member(_,[]):- fail.
 member(X,[X|_]). 
@@ -372,7 +372,7 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln('cout'+C),trWay(T,D),flatten(D,L1), racc(L1,L).
+shWay(S1,S2,L) :- sWay2(S1,S2,[],T,C), writeln('cout'+C),trWay(T,D),flatten(D,L1), racc(L1,L).
 
 /* TODO function with cost notion */
 
@@ -380,18 +380,18 @@ sWay2(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
 sWay2(S1,S2,LI,[LT1,LT2],C) :-
 								heuristique(S1,ST,S2),
-								sWay(S1,ST,LI,LT1,C1),
-								sWay(ST,S2,[S1|LI],LT2,C2), 
+								sWay2(S1,ST,LI,LT1,C1),
+								sWay2(ST,S2,[S1|LI],LT2,C2), 
 								C is (C1 + C2).
 sWay2(S,S,_,_,_) :- false.
 
 
-heuristique(S1,S2,S3) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
-								sommet(S3,X3,Y3,_), (X2 = X3 ; Y2 = Y3).
-heuristique(S1,S2,S3) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
-								sommet(S3,X3,Y3,_), ((X1 - X3) > (X2 - X3) ; 
-															Y1 - Y3) > (Y2 - Y3)).
-heuristique(S1,S2,_) :- arc(S1,S2).
+heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
+								sommet(S3,X3,Y3,_), not(member(S2,L)),(X2 = X3 ; Y2 = Y3),!.
+heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,X1,Y1,_), sommet(S2,X2,Y2,_),
+								sommet(S3,X3,Y3,_), not(member(S2,L)), ((X1 - X3) > (X2 - X3) ; 
+															(Y1 - Y3) > (Y2 - Y3)),!.
+heuristique(S1,S2,_,_) :- arc(S1,S2),not(member(S2,L)).
 
 /*
 * dirArc(+A,?D)
@@ -449,7 +449,7 @@ moveRobot([T|Q],R,[R,T|Q1]):- moveRobot(Q,R,Q1).
 /**
  * Initialize the begin of the game
  */
-init(_) :- makeGraphe, cmpS.						
+init(_) :- makeGraphe, cmpS, writeln('initialisation OK').						
 									
 /**
  * move( +L, -ActionId )
@@ -457,9 +457,9 @@ init(_) :- makeGraphe, cmpS.
  * _ is the list of action
  *exemple :assertRobot(3,1,[5,15,0,2,1,4,4,0]).
  */
-move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], L):- 
+move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], L):- writeln('recherche cible'+T),
 	assertRobot(3,[XR,YR, XY,YY, XG,YG, XB,YB]), target(T,_,_,R1), R is R1-1, makeGraphe(R), robot(R,X1,Y1),sommet(SR,X1,Y1,_), 
-	sommet(ST,_,_,T), shWay(SR,ST,L1),!, writeln(L1), moveRobot(L1,R,L), writeln(L), resteGraphe.
+	sommet(ST,_,_,T),writeln('start rechercher'), shWay(SR,ST,L1),!, writeln(L1), moveRobot(L1,R,L), writeln(L), resteGraphe.
 
 % Examples
 %move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
