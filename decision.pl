@@ -44,7 +44,7 @@
  * X,Y : positon robot
  */
  
-%robot(1,1,1).
+robot(1,1,1).
 %robot(2,4,15).
 %robot(3,13,6).
 %robot(4,13,13).
@@ -367,13 +367,13 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln(T),trWay(T,D),flatten(D,L1), racc(L1,L).
+shWay(S1,S2,L) :- sWay(S1,S2,[],T,C), writeln(C),trWay(T,D),flatten(D,L1), racc(L1,L).
 
 /* TODO function with cost notion */
 sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
 sWay(S1,S2,LI,[LT1,LT2],C) :-
-								sWay(S1,ST,LI,LT1,C1), 
+								sWay(S1,ST,LI,LT1,C1), writeln(S1+' '+ST),
 								sWay(ST,S2,[S1|LI],LT2,C2), 
 								C is (C1 + C2).
 sWay(S,S,_,_,_) :- false.
@@ -383,10 +383,10 @@ sWay(S,S,_,_,_) :- false.
 * A : une liste de 2 sommet forment un arc
 * D : la direction de l'arc pour du sommet 1 atteindre le sommet 2
 */
-dirArc([S1,S2],top):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 > Y2.
-dirArc([S1,S2],down):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 < Y2.
-dirArc([S1,S2],left):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 > X2.
-dirArc([S1,S2],right):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 < X2.
+dirArc([S1,S2],2):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 > Y2.
+dirArc([S1,S2],4):- arc(S1,S2),sommet(S1,X,Y1,_), sommet(S2,X,Y2,_), Y1 < Y2.
+dirArc([S1,S2],3):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 > X2.
+dirArc([S1,S2],1):- arc(S1,S2),sommet(S1,X1,Y,_), sommet(S2,X2,Y,_), X1 < X2.
 
 /*
 * trWay(+L,?D)
@@ -403,17 +403,30 @@ trWay([L|Q],[T|D]):- trWay(L,T),trWay(Q,D).
 * L2 : liste simplifié des directions
 */
 racc([],[]).
-racc([top,down|Q],[down|L]):- racc(Q,L).
-racc([down,top|Q],[top|L]):- racc(Q,L).
-racc([right,left|Q],[left|L]):- racc(Q,L).
-racc([left,right|Q],[right|L]):- racc(Q,L).
+racc([2,4|Q],[4|L]):- racc(Q,L).
+racc([4,2|Q],[2|L]):- racc(Q,L).
+racc([1,3|Q],[3|L]):- racc(Q,L).
+racc([3,1|Q],[1|L]):- racc(Q,L).
 racc([T|Q],[T|L]):- racc(Q,L).
 
 cmpS :- cmpS(1).
 cmpS(C):- not(sommet(C,_,_,_)),!,C1 is C-1,assert(size(C1)).
 cmpS(C):- sommet(C,_,_,_), C1 is C +1, cmpS(C1).
 
+supA :- size(N), N1 is N+1, supA(N1).
+supA(N) :- retract(arc(N,_)), supA(N).
+supA(N) :- retract(arc(_,N)), supA(N).
+supA(N) :- N1 is N+1, sommet(N1,_,_,_), supA(N1).
+supA(_).
 
+supS :- size(N), N1 is N+1, supS(N1).
+supS(N) :- retract(sommet(N,_,_,_)), N1 is N+1, supS(N1).
+supS(_).
+
+resteGraphe:- supA,supSs.
+
+moveRobot([],R,[]).
+moveRobot([T|Q],R,[R,T|Q]):- moveRobot(Q,R,Q). 
 /***************************************************************
 ********************** Appel externe ***************************
 ***************************************************************/
@@ -421,7 +434,7 @@ cmpS(C):- sommet(C,_,_,_), C1 is C +1, cmpS(C1).
 /**
  * Initialize the begin of the game
  */
-init(_) :- makeGraphe.						
+init(_) :- makeGraphe, cmpS.						
 									
 /**
  * move( +L, -ActionId )
@@ -429,15 +442,15 @@ init(_) :- makeGraphe.
  * _ is the list of action
  *exemple :assertRobot(3,1,[5,15,0,2,1,4,4,0]).
  */
-move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], _):- 
-	assertRobot(3,T,[XR,YR, XY,YY, XG,YG, XB,YB]), listing(robot).
+move([0,0,0,0, T, XB,YB, XG,YG, XY,YY, XR,YR], L):- 
+	assertRobot(3,T,[XR,YR, XY,YY, XG,YG, XB,YB]), target(T,_,_,R), makeGraphe(R), robot(R,X1,Y1),sommet(SR,X1,Y1,_), 
+	sommet(ST,_,_,T), shWay(SR,ST,L1), moveRobot(L1,R,L), resteGraphe.
 
 % Examples
 move( [0,0,0,0,  1, 4,0 | _], [0,4,0,1,0,4,0,1,0,2,0,3,0,2,0,3] ) :- !.
 move( [0,0,0,0,  2, 6,1 | _], [0,1,0,4] ) :- !.
 
 move( [0,0,0,0, 14, _,_, _,_, _,_, 15,5], [3,3,3,2,3,3,3,4] ) :- !.
-
 move( _, [] ) :- !.
 %        ^
 %        |
