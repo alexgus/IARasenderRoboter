@@ -372,7 +372,7 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
  * 	S2 : End point
  * 	L 	: List of sommet begining by S1 and ending by S2
  */
-shWay(S1,S2,L) :- sWay2(S1,S2,[],T,C), writeln('cout'+C),trWay(T,D),flatten(D,L1), racc(L1,L).
+shWay(S1,S2,L) :- sWay2(S1,S2,[],T),trWay(T,D),flatten(D,L1), racc(L1,L), length(L,C),writeln('cout'+C),writeln(L).
 
 sWay(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
 									not(member(S2,LI)).
@@ -383,16 +383,12 @@ sWay(S1,S2,LI,[LT1,LT2],C) :-
 sWay(S,S,_,_,_) :- false.
 
 
-sWay2(S1,S2,LI,[S1,S2],1) :- arc(S1,S2),
+sWay2(S1,S2,LI,[S1,S2]) :- arc(S1,S2),
 									not(member(S2,LI)).
-sWay2(S1,S2,LI,[LT1,LT2],C) :-
+sWay2(S1,S2,LI,[ST|LT]) :-
 								heuristique(S1,ST,S2,LI),
-								sWay2(S1,ST,LI,LT1,C1),
-								sWay2(ST,S2,[S1|LI],LT2,C2), 
-								C is (C1 + C2).
+								sWay2(ST,S2,[ST|LI],LT).
 sWay2(S,S,_,_,_) :- false.
-
-
 
 
 heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,_,_,_), 
