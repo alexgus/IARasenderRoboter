@@ -382,7 +382,13 @@ sWay(S1,S2,LI,[LT1,LT2],C) :-
 								C is (C1 + C2).
 sWay(S,S,_,_,_) :- false.
 
-
+/**
+ * sWay2(+S1,+S2,+LI,?L)
+ * 	S1 : Begin point
+ * 	S2 : End point
+ *  LI : List of sommet forbidden
+ * 	L  : List of sommet begining by S1 and ending by S2
+ */
 sWay2(S1,S2,LI,[S1,S2]) :- arc(S1,S2),
 									not(member(S2,LI)).
 sWay2(S1,S2,LI,[ST|LT]) :-
@@ -390,14 +396,20 @@ sWay2(S1,S2,LI,[ST|LT]) :-
 								sWay2(ST,S2,[ST|LI],LT).
 sWay2(S,S,_,_,_) :- false.
 
-
+/**
+ * heuristique(+S1,?S2,+S3,+L)
+ * S1 : Start point
+ * S2 : Sommet to go with the good heuristique
+ * S3 : End point, target
+ * L  : List of sommet forbidden
+ */
 heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,_,_,_), 
 								sommet(S2,X2,Y2,_), sommet(S3,X3,Y3,_), 
 								not(member(S2,L)),(X2 = X3 ; Y2 = Y3).
 heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,X1,Y1,_), 
 								sommet(S2,X2,Y2,_), sommet(S3,X3,Y3,_), 
 								not(member(S2,L)), ((X1 - X3) > (X2 - X3) ; 
-														(Y1 - Y3) > (Y2 - Y3)).
+								(Y1 - Y3) > (Y2 - Y3)).
 heuristique(S1,S2,_,L) :- arc(S1,S2),not(member(S2,L)).
 
 /*
