@@ -391,8 +391,9 @@ sWay(S,S,_,_,_) :- false.
  */
 sWay2(S1,S2,LI,[S1,S2]) :- arc(S1,S2),
 									not(member(S2,LI)).
-sWay2(S1,S2,LI,[ST|LT]) :-
+sWay2(S1,S2,LI,[LT1|LT]) :-
 								heuristique(S1,ST,S2,LI),
+								sWay2(S1,ST,LI,LT1),
 								sWay2(ST,S2,[ST|LI],LT).
 sWay2(S,S,_,_,_) :- false.
 
