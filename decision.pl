@@ -386,14 +386,14 @@ sWay2(S1,S2,LI,[LT1,LT2],C) :-
 sWay2(S,S,_,_,_) :- false.
 
 
-heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,X1,Y1,_), 
+heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,_,_,_), 
 								sommet(S2,X2,Y2,_), sommet(S3,X3,Y3,_), 
 								not(member(S2,L)),(X2 = X3 ; Y2 = Y3).
 heuristique(S1,S2,S3,L) :- arc(S1,S2), sommet(S1,X1,Y1,_), 
 								sommet(S2,X2,Y2,_), sommet(S3,X3,Y3,_), 
 								not(member(S2,L)), ((X1 - X3) > (X2 - X3) ; 
 														(Y1 - Y3) > (Y2 - Y3)).
-heuristique(S1,S2,_,_) :- arc(S1,S2),not(member(S2,L)).
+heuristique(S1,S2,_,L) :- arc(S1,S2),not(member(S2,L)).
 
 /*
 * dirArc(+A,?D)
