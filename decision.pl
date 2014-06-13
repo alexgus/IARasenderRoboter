@@ -333,7 +333,10 @@ mkG(X,Y,[]) :- sommet(_,X,Y,_).
 mkG(X,Y,[T|Q]) :- deplacement(X,Y,T,XN,YN),mkG(XN,YN,[]),mkG(X,Y,Q),!,
 						sommet(S1,X,Y,_),sommet(S2,XN,YN,_),insertArc(S1,S2).
 
-						
+/**
+ * MakeGraphe begin with target 1 wich is reachable
+ * MakeGraphe/1 begin with robot in arg
+ */			
 makeGraphe :- target(1,X,Y,_), mkG(X,Y,[]).
 makeGraphe(R) :- robot(R,X,Y), mkG(X,Y,[]).
 
@@ -366,7 +369,7 @@ tListSom([T1a,T1b|Q1],[T2|Q2]) :- tSom(T1a,T1b,T2), tListSom(Q1,Q2).
 
 
 /**
- * Shortest way between two sommet
+ * Shortest way between two sommet without heuristique
  * shWay(+S1,+S2,?L)
  * 	S1 : Begin point
  * 	S2 : End point
@@ -383,6 +386,7 @@ sWay(S1,S2,LI,[LT1,LT2],C) :-
 sWay(S,S,_,_,_) :- false.
 
 /**
+ * Shortest way between two sommet without heuristique
  * sWay2(+S1,+S2,+LI,?L)
  * 	S1 : Begin point
  * 	S2 : End point
@@ -444,24 +448,45 @@ racc([1,3|Q],[3|L]):- racc(Q,L).
 racc([3,1|Q],[1|L]):- racc(Q,L).
 racc([T|Q],[T|L]):- racc(Q,L).
 
+/**
+ * Save the size of the graphe after init predicat for knowing 
+ * what we have to delete after the move predicat
+ */
 cmpS :- cmpS(1).
 cmpS(C):- not(sommet(C,_,_,_)),!,C1 is C-1,assert(size(C1)).
 cmpS(C):- sommet(C,_,_,_), C1 is C +1, cmpS(C1).
 
+/**
+ * Delete arc inserted by the predicat move (and not ones inserted by init)
+ */
 supA :- size(N), N1 is N+1, supA(N1).
 supA(N) :- retract(arc(N,_)), supA(N).
 supA(N) :- retract(arc(_,N)), supA(N).
 supA(N) :- N1 is N+1, sommet(N1,_,_,_), supA(N1).
 supA(_).
 
+/**
+ * Delete sommet inserted by the predicat move (and not ones inserted by init)
+ */
 supS :- size(N), N1 is N+1, supS(N1).
 supS(N) :- retract(sommet(N,_,_,_)), N1 is N+1, supS(N1).
 supS(_).
 
+/**
+ * Delete arc and sommet inserted by the predicat move (and not ones inserted by init)
+ */
 resteGraphe:- supA,supS.
 
+/**
+ * Convert list of direction in list understandable by the move predicats
+ * moveRobot(+L,+R,-TR)
+ * L  : List of direction to translate
+ * R  : Robot wich is doing this moves
+ * TR : Result of the predicat
+ */
 moveRobot([],_,[]).
 moveRobot([T|Q],R,[R,T|Q1]):- moveRobot(Q,R,Q1). 
+
 /***************************************************************
 ********************** Appel externe ***************************
 ***************************************************************/
